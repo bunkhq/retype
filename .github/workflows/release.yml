@@ -21,6 +21,11 @@ jobs:
     steps:
       - uses: actions/checkout@v4
       - uses: dtolnay/rust-toolchain@stable
+      # Restores the dependencies CI compiled on main (per platform).
+      - uses: Swatinem/rust-cache@v2
+        with:
+          shared-key: release
+          save-if: false
       - name: Check the tag matches Cargo.toml
         run: |
           v=$(sed -n 's/^version = "\(.*\)"/\1/p' Cargo.toml | head -1)
@@ -40,6 +45,10 @@ jobs:
     steps:
       - uses: actions/checkout@v4
       - uses: dtolnay/rust-toolchain@stable
+      - uses: Swatinem/rust-cache@v2
+        with:
+          shared-key: release
+          save-if: false
       - name: Build
         run: cargo build --release
       - name: Fetch ffmpeg

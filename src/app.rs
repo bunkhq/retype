@@ -576,6 +576,75 @@ impl eframe::App for RetypeApp {
         [0.0; 4]
     }
 
+    /// Runs every frame, and also while the window is hidden (when `ui` doesn't):
+    /// the menu-bar icon, the shortcut, and a parked job finishing.
+    fn logic(&mut self, ctx: &egui::Context, _frame: &mut eframe::Frame) {
+        // Menu-bar icon and global shortcut follow the settings.
+        self.resident.sync(self.prefs.settings);
+        for action in crate::resident::take() {
+            match action {
+                crate::resident::Action::Show => self.unpark(ctx),
+                crate::resident::Action::Settings => {
+                    self.unpark(ctx);
+                    ctx.send_viewport_cmd(egui::ViewportCommand::Focus);
+                    // A running conversion keeps its screen; settings open once it's done.
+                    if !matches!(self.screen, Screen::Working(_)) {
+                        self.notice = None;
+                        self.screen = Screen::Settings;
+                    }
+                }
+                crate::resident::Action::ConvertSelection => {
+                    let sel = platform::file_manager_selection();
+                    self.unpark(ctx);
+                    if sel.is_empty() {
+                        self.say(icon::ALERT, format!("Select files in {} first", platform::file_manager_name()));
+                    } else if matches!(self.screen, Screen::Working(_)) {
+                        self.pending.extend(sel);
+                    } else {
+                        self.load(&sel);
+                    }
+                }
+                crate::resident::Action::CheckUpdates => {
+                    self.unpark(ctx);
+                    self.manual_update_check = true;
+                    self.last_update_check = Some(Instant::now());
+                    let c = ctx.clone();
+                    crate::update::check_in_background(self.update.clone(), move || c.request_repaint());
+                }
+                crate::resident::Action::Quit => {
+                    self.quitting = true;
+                    self.save_window_pos(ctx, true);
+                    ctx.send_viewport_cmd(egui::ViewportCommand::Close);
+                }
+            }
+        }
+
+        if !self.is_hidden() {
+            return;
+        }
+        if crate::ipc::peek() {
+            // Files from another launch: show the window so `ui` runs and takes them.
+            if cfg!(windows) {
+                ctx.send_viewport_cmd(egui::ViewportCommand::Visible(true));
+                ctx.request_repaint();
+            }
+            return;
+        }
+        // Closed: keep the event loop alive. Parked jobs still finish and notify.
+        if self.parked {
+            if let Screen::Working(job) = &self.screen {
+                if job.snapshot().done {
+                    let s = job.snapshot();
+                    self.finish(ctx);
+                    platform::notify("Retype", &done_message(&s));
+                }
+            }
+        }
+        ctx.request_repaint_after(Duration::from_millis(250));
+        #[cfg(target_os = "macos")]
+        crate::macos::refresh_shadow();
+    }
+
     fn ui(&mut self, ui: &mut egui::Ui, frame: &mut eframe::Frame) {
         let ctx = ui.ctx().clone();
         theme::sync(&ctx);
@@ -590,62 +659,9 @@ impl eframe::App for RetypeApp {
             }
         }
 
-        // Menu-bar icon and global shortcut follow the settings.
-        self.resident.sync(self.prefs.settings);
-        for action in crate::resident::take() {
-            match action {
-                crate::resident::Action::Show => self.unpark(&ctx),
-                crate::resident::Action::Settings => {
-                    self.unpark(&ctx);
-                    ctx.send_viewport_cmd(egui::ViewportCommand::Focus);
-                    // A running conversion keeps its screen; settings open once it's done.
-                    if !matches!(self.screen, Screen::Working(_)) {
-                        self.notice = None;
-                        self.screen = Screen::Settings;
-                    }
-                }
-                crate::resident::Action::ConvertSelection => {
-                    let sel = platform::file_manager_selection();
-                    self.unpark(&ctx);
-                    if sel.is_empty() {
-                        self.say(icon::ALERT, format!("Select files in {} first", platform::file_manager_name()));
-                    } else if matches!(self.screen, Screen::Working(_)) {
-                        self.pending.extend(sel);
-                    } else {
-                        self.load(&sel);
-                    }
-                }
-                crate::resident::Action::CheckUpdates => {
-                    self.unpark(&ctx);
-                    self.manual_update_check = true;
-                    self.last_update_check = Some(Instant::now());
-                    let c = ctx.clone();
-                    crate::update::check_in_background(self.update.clone(), move || c.request_repaint());
-                }
-                crate::resident::Action::Quit => {
-                    self.quitting = true;
-                    self.save_window_pos(&ctx, true);
-                    ctx.send_viewport_cmd(egui::ViewportCommand::Close);
-                }
-            }
-        }
-
-        let hidden = self.parked || self.background.load(std::sync::atomic::Ordering::Relaxed);
-        if hidden && !crate::ipc::peek() {
-            // Closed: draw nothing (the window is transparent and click-through) and
-            // keep the event loop alive. Parked jobs still finish and notify.
-            if self.parked {
-                if let Screen::Working(job) = &self.screen {
-                    if job.snapshot().done {
-                        let s = job.snapshot();
-                        self.finish(&ctx);
-                        platform::notify("Retype", &done_message(&s));
-                    }
-                }
-            }
-            ctx.request_repaint_after(Duration::from_millis(250));
-            #[cfg(target_os = "macos")]
-            crate::macos::refresh_shadow();
+        if self.is_hidden() && !crate::ipc::peek() {
+            // Closed (macOS: the window is still there, transparent and click-through,
+            // so `ui` keeps running). Draw nothing; `logic` does the rest.
             return;
         }
 
@@ -667,18 +683,20 @@ impl eframe::App for RetypeApp {
             ctx.send_viewport_cmd(egui::ViewportCommand::StartDrag);
         }
 
-        // Files from another launch, the Dock, or Open With.
-        let inbox: Vec<PathBuf> = crate::ipc::take().into_iter().flat_map(|m| m.files).collect();
-        if !inbox.is_empty() {
+        // Files from another launch, the Dock, or Open With. A launch without files
+        // (e.g. from the Start menu while closed to the tray) just brings the card back.
+        let msgs = crate::ipc::take();
+        if !msgs.is_empty() {
+            let inbox: Vec<PathBuf> = msgs.into_iter().flat_map(|m| m.files).collect();
             if self.background.swap(false, std::sync::atomic::Ordering::Relaxed) {
                 // Hidden while finishing: come back, and pick these up once the job is done.
-                ctx.send_viewport_cmd(egui::ViewportCommand::MousePassthrough(false));
+                show_window(&ctx, true);
                 self.sized = false;
             }
             self.unpark(&ctx);
             if matches!(self.screen, Screen::Working(_)) {
                 self.pending.extend(inbox);
-            } else {
+            } else if !inbox.is_empty() {
                 self.load(&inbox);
             }
             ctx.send_viewport_cmd(egui::ViewportCommand::Focus);
@@ -1027,7 +1045,7 @@ impl RetypeApp {
             return;
         }
         self.parked = true;
-        ctx.send_viewport_cmd(egui::ViewportCommand::MousePassthrough(true));
+        show_window(ctx, false);
         platform::set_dock_icon(false);
         if !matches!(self.screen, Screen::Working(_)) {
             // A fresh card next time, unless there is a result worth coming back to.
@@ -1045,7 +1063,7 @@ impl RetypeApp {
         }
         self.parked = false;
         self.sized = false;
-        ctx.send_viewport_cmd(egui::ViewportCommand::MousePassthrough(false));
+        show_window(ctx, true);
         platform::set_dock_icon(true);
         ctx.send_viewport_cmd(egui::ViewportCommand::Focus);
     }
@@ -1056,12 +1074,15 @@ impl RetypeApp {
             return false;
         }
         if !self.background.swap(true, std::sync::atomic::Ordering::Relaxed) {
-            // Hiding the root window ends eframe's event loop, so instead the window
-            // goes fully transparent and lets clicks through until the job ends.
-            ctx.send_viewport_cmd(egui::ViewportCommand::MousePassthrough(true));
+            show_window(ctx, false);
             finish_in_background(job.clone(), self.background.clone());
         }
         true
+    }
+
+    /// Closed into the menu bar, or finishing a job after the window closed.
+    fn is_hidden(&self) -> bool {
+        self.parked || self.background.load(std::sync::atomic::Ordering::Relaxed)
     }
 
     fn set_on_top(&mut self, ctx: &egui::Context, on: bool) {
@@ -1085,6 +1106,9 @@ impl RetypeApp {
 
         let mut st = self.prefs.settings;
         let fm = platform::file_manager_name();
+        let tray = platform::tray_name();
+        let tray_tip = format!("Closing the window keeps Retype in the {tray}, ready for the shortcut");
+        let finish_tip = format!("Without the {tray}: closing mid-conversion lets it finish, then notifies you");
         let mut menu_on = self.integration_on;
         let mut rows: Vec<(String, &mut bool, bool, &str)> = vec![
             ("Keep photo dates and camera info".into(), &mut st.keep_metadata, true, "Capture date, camera, lens and orientation stay with converted photos"),
@@ -1094,10 +1118,10 @@ impl RetypeApp {
         if cfg!(target_os = "macos") {
             rows.push(("Hardware video encoding".into(), &mut st.hardware_video, true, "Faster video conversions using the Mac's media engine"));
         }
-        rows.push(("Stay in the menu bar when closed".into(), &mut st.menu_bar, true, "Closing the window keeps Retype in the menu bar, ready for the shortcut"));
+        rows.push((format!("Stay in the {tray} when closed"), &mut st.menu_bar, true, &tray_tip));
         let shortcut_label = format!("{} converts the {fm} selection", crate::resident::shortcut_label());
         rows.push((shortcut_label, &mut st.global_shortcut, true, "Works from any app"));
-        rows.push(("Finish converting after closing".into(), &mut st.finish_after_close, true, "Without the menu bar: closing mid-conversion lets it finish, then notifies you"));
+        rows.push(("Finish converting after closing".into(), &mut st.finish_after_close, true, &finish_tip));
         rows.push(("Keep window on top".into(), &mut st.keep_on_top, true, "Float above other windows"));
         rows.push(("Check for updates".into(), &mut st.check_updates, true, "Asks GitHub once a day whether a newer Retype exists. Nothing else leaves this computer."));
         rows.push((format!("{fm} right-click menu"), &mut menu_on, true, "Convert files without opening this window"));
@@ -1105,7 +1129,7 @@ impl RetypeApp {
         let mut y = c.min.y + 38.0;
         let row_h = 38.0;
         let disabled_location = !self.prefs.settings.keep_metadata;
-        // With the menu bar on, closing never quits, so "finish after closing" doesn't apply.
+        // With the menu bar / tray on, closing never quits, so "finish after closing" doesn't apply.
         let disabled_finish = self.prefs.settings.menu_bar;
         for (i, (label, value, _, tip)) in rows.iter_mut().enumerate() {
             let enabled = !(i == 1 && disabled_location) && !(disabled_finish && label.starts_with("Finish converting"));
@@ -1790,6 +1814,16 @@ pub fn icon_toggle(ui: &mut egui::Ui, center: Pos2, glyph: char, tip: &str, on: 
 /// Start over: back to the empty card. Sits at the left of the source row.
 fn back_button(ui: &mut egui::Ui, c: Rect) -> bool {
     icon_button(ui, Pos2::new(c.min.x + 10.0, c.min.y + 10.0), icon::BACK, "Start over  Esc", false, "back", 28.0).clicked()
+}
+
+/// Show or hide the window without ending the app. macOS keeps it on screen, fully
+/// transparent and click-through. Windows hides it outright: DWM still draws a border
+/// and shadow around an undecorated transparent window, and it would stay in the taskbar.
+fn show_window(ctx: &egui::Context, shown: bool) {
+    ctx.send_viewport_cmd(egui::ViewportCommand::MousePassthrough(!shown));
+    if cfg!(windows) {
+        ctx.send_viewport_cmd(egui::ViewportCommand::Visible(shown));
+    }
 }
 
 /// After the window closes mid-conversion: wait for the job, tell the user, quit.

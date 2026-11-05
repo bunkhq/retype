@@ -1031,7 +1031,14 @@ mod tests {
     use super::*;
     use std::sync::atomic::AtomicBool;
 
+    /// Built once per run: tests run in parallel, and two of them writing the same
+    /// fixture at once leaves a half-written file for the other.
     fn fixtures() -> PathBuf {
+        static DIR: std::sync::OnceLock<PathBuf> = std::sync::OnceLock::new();
+        DIR.get_or_init(make_fixtures).clone()
+    }
+
+    fn make_fixtures() -> PathBuf {
         let d = std::env::temp_dir().join("retype-fixtures-2");
         std::fs::create_dir_all(&d).unwrap();
         let ff = tool("ffmpeg").expect("ffmpeg for tests");

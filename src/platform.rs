@@ -8,6 +8,11 @@ pub fn file_manager_name() -> &'static str {
     if cfg!(target_os = "macos") { "Finder" } else if cfg!(windows) { "Explorer" } else { "Files" }
 }
 
+/// Where Retype's icon lives while the window is closed.
+pub fn tray_name() -> &'static str {
+    if cfg!(target_os = "macos") { "menu bar" } else { "system tray" }
+}
+
 pub fn open(path: &Path) {
     #[cfg(target_os = "macos")]
     let _ = Command::new("open").arg(path).spawn();

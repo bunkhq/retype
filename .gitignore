@@ -4,3 +4,5 @@
 .impeccable/questions/
 .impeccable/hook.cache.json
 .impeccable/config.local.json
+/dist
+/target

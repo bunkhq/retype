@@ -103,7 +103,7 @@ def main():
         for rp in rpaths(path):
             if rp.startswith("/opt/") or rp.startswith("/usr/local"):
                 subprocess.run(["install_name_tool", "-delete_rpath", rp, path], capture_output=True)
-        run("codesign", "--force", "--sign", os.environ.get("RETYPE_SIGN_ID", "-"), path)
+        run("codesign", "--force", "--sign", os.environ.get("RETYPE_SIGN_ID") or "-", path)
 
     total = sum(os.path.getsize(p) for p in [os.path.join(res, "ffmpeg"), os.path.join(res, "ffprobe")] + list(seen.values()))
     print(f"Embedded ffmpeg, ffprobe and {len(seen)} libraries ({total / 1e6:.0f} MB)")

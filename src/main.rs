@@ -148,13 +148,13 @@ fn housekeeping() {
 
 fn run_window(files: Vec<PathBuf>) -> eframe::Result<()> {
     let prefs = prefs::Prefs::load();
-    // A floating card: no title bar, transparent corners, on top unless turned off.
+    // A floating card: no title bar, transparent corners (Windows: OS-rounded), on top unless turned off.
     let mut viewport = egui::ViewportBuilder::default()
         .with_title("Retype")
         .with_inner_size(egui::vec2(app::WIDTH, app::START_HEIGHT))
         .with_resizable(false)
         .with_decorations(false)
-        .with_transparent(true)
+        .with_transparent(platform::TRANSPARENT_WINDOW)
         .with_drag_and_drop(true)
         .with_icon(icon());
     if prefs.settings.keep_on_top {
@@ -175,7 +175,7 @@ fn run_toast(files: Vec<PathBuf>, to: String) -> eframe::Result<()> {
         .with_inner_size(toast::SIZE)
         .with_resizable(false)
         .with_decorations(false)
-        .with_transparent(true)
+        .with_transparent(platform::TRANSPARENT_WINDOW)
         .with_always_on_top()
         .with_taskbar(false)
         .with_visible(false)

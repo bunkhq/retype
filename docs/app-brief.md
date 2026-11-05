@@ -34,7 +34,7 @@ WORKING               DONE
 - **Over:** while a file is still being dragged in, the window already shows its name with the most likely target extension highlighted. egui exposes the hovered path on both OSes through `raw.hovered_files`. Releasing the file lands in Pick with the right answer already selected.
 - **Pick:** the default target is the most likely one for the source type (.heic→.jpg, .mkv→.mp4, .mov→.mp4, .wav→.mp3). Retype remembers the last choice per source type, so a repeat job is drop then Enter. Scroll, arrow keys, or chips change the target. Enter, clicking the highlight, or clicking a chip converts.
 - **Working:** real progress. A remux finishes almost instantly; never hold it on screen to show an animation. Esc cancels and deletes the partial file.
-- **Done:** see section 3. Dropping a new file at any time replaces the current one; there is no reset button.
+- **Done:** see section 3. Dropping a new file on Done (or the empty card) starts over; there is no reset button. On the picker, or while converting, dropped files join the list; hold Shift while dropping to start over instead.
 
 ## 3. The converted file behaves like a real file
 

@@ -119,6 +119,62 @@ pub fn take_paste_key(focused: bool) -> bool {
     PASTE_KEY.swap(false, std::sync::atomic::Ordering::Relaxed)
 }
 
+/// Whether Shift is held right now. Read from the OS because a window that is
+/// only the target of a file drag gets no key events.
+pub fn shift_down() -> bool {
+    #[cfg(windows)]
+    {
+        use windows_sys::Win32::UI::Input::KeyboardAndMouse::{GetAsyncKeyState, VK_SHIFT};
+        return unsafe { GetAsyncKeyState(VK_SHIFT as i32) < 0 };
+    }
+    #[cfg(target_os = "macos")]
+    {
+        use objc2_app_kit::{NSEvent, NSEventModifierFlags};
+        return NSEvent::modifierFlags_class().contains(NSEventModifierFlags::Shift);
+    }
+    #[allow(unreachable_code)]
+    false
+}
+
+/// Whether the window may be transparent around the card's rounded corners.
+/// Windows doesn't rely on it: some GPU drivers ignore the alpha and the corners
+/// show white. There the OS rounds the window instead (see `round_corners`).
+pub const TRANSPARENT_WINDOW: bool = !cfg!(windows);
+
+static OS_ROUNDED: std::sync::atomic::AtomicBool = std::sync::atomic::AtomicBool::new(false);
+
+/// Windows 11: ask DWM to round the window's corners (antialiased, with the
+/// system border and shadow). Windows 10 can't; its window stays square.
+pub fn round_corners(cc: &eframe::CreationContext<'_>) {
+    #[cfg(windows)]
+    {
+        use raw_window_handle::{HasWindowHandle, RawWindowHandle};
+        use windows_sys::Win32::Graphics::Dwm::{DWMWA_WINDOW_CORNER_PREFERENCE, DWMWCP_ROUND, DwmSetWindowAttribute};
+        let Ok(h) = cc.window_handle() else { return };
+        let RawWindowHandle::Win32(h) = h.as_raw() else { return };
+        let pref = DWMWCP_ROUND;
+        let hr = unsafe { DwmSetWindowAttribute(h.hwnd.get() as _, DWMWA_WINDOW_CORNER_PREFERENCE as u32, (&raw const pref).cast(), size_of_val(&pref) as u32) };
+        OS_ROUNDED.store(hr >= 0, std::sync::atomic::Ordering::Relaxed);
+    }
+    let _ = cc;
+}
+
+/// The OS draws the window's rounded corners and border (Windows 11).
+pub fn os_rounds_corners() -> bool {
+    OS_ROUNDED.load(std::sync::atomic::Ordering::Relaxed)
+}
+
+/// Corner radius for a card that fills its window: square on Windows, where the
+/// window itself is opaque and the OS rounds it.
+pub fn card_radius(radius: u8) -> u8 {
+    if TRANSPARENT_WINDOW { radius } else { 0 }
+}
+
+/// Windows has no transparent corners to fill: the clear colour is the card's.
+pub fn clear_color() -> [f32; 4] {
+    if TRANSPARENT_WINDOW { [0.0; 4] } else { crate::theme::paper().to_normalized_gamma_f32() }
+}
+
 /// Haptic tick (macOS trackpads only).
 pub fn haptic(strong: bool) {
     #[cfg(target_os = "macos")]

@@ -228,17 +228,21 @@ fn windows_exts() -> Vec<&'static str> {
         .collect()
 }
 
+/// Whether the installed menu runs this copy of Retype, and is the current layout
+/// (menus from 0.1.1 and earlier have no command on the "Retype" verb itself).
 #[cfg(windows)]
 fn points_here() -> bool {
     use std::os::windows::process::CommandExt;
     let Ok(exe) = exe() else { return true };
-    let key = format!(r"{}\shell\99open\command", assoc_key("png"));
-    std::process::Command::new("reg")
-        .args(["query", &key, "/ve"])
-        .creation_flags(0x0800_0000)
-        .output()
-        .map(|o| String::from_utf8_lossy(&o.stdout).contains(&exe.display().to_string()))
-        .unwrap_or(true)
+    let runs_here = |key: String| {
+        std::process::Command::new("reg")
+            .args(["query", &key, "/ve"])
+            .creation_flags(0x0800_0000)
+            .output()
+            .map(|o| o.status.success() && String::from_utf8_lossy(&o.stdout).contains(&exe.display().to_string()))
+            .unwrap_or(true)
+    };
+    runs_here(format!(r"{}\shell\99open\command", assoc_key("png"))) && runs_here(format!(r"{}\command", assoc_key("png")))
 }
 
 #[cfg(windows)]
@@ -250,6 +254,10 @@ pub fn install() -> Result<(), String> {
         reg(&["add", &base, "/v", "MUIVerb", "/d", "Retype", "/f"])?;
         reg(&["add", &base, "/v", "SubCommands", "/d", "", "/f"])?;
         reg(&["add", &base, "/v", "Icon", "/d", &exe, "/f"])?;
+        // Explorer can invoke the cascade's own verb too (Enter on it, the Windows 11
+        // menu, or as the default when a type has no "open"). Without a command that
+        // shows "This file does not have an app associated with it"; open in Retype instead.
+        reg(&["add", &format!(r"{base}\command"), "/ve", "/d", &format!("\"{exe}\" open \"%1\""), "/f"])?;
         for (i, t) in crate::formats::targets_for(&norm).iter().enumerate() {
             let k = format!(r"{base}\shell\{i:02}{t}");
             reg(&["add", &k, "/v", "MUIVerb", "/d", &format!(".{t}"), "/f"])?;

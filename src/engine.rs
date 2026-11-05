@@ -13,22 +13,31 @@ use std::process::{Child, Command, Stdio};
 use std::sync::atomic::{AtomicBool, Ordering};
 use std::sync::{Arc, Mutex};
 
-/// Locate a bundled or installed helper binary (ffmpeg, ffprobe).
-/// Finder-launched apps do not inherit the shell PATH, so check the usual
-/// install locations too.
+/// Locate a helper binary (ffmpeg, ffprobe). The user's own install comes first:
+/// they chose it, and it is often newer or built with more encoders. The copy
+/// bundled with Retype is the fallback. Finder- and Explorer-launched apps may
+/// not have the shell's PATH, so the usual install locations are checked too.
 pub fn tool(name: &str) -> Option<PathBuf> {
     let exe_name = if cfg!(windows) { format!("{name}.exe") } else { name.to_string() };
     let mut dirs: Vec<PathBuf> = Vec::new();
+    if let Some(path) = std::env::var_os("PATH") {
+        dirs.extend(std::env::split_paths(&path));
+    }
+    if cfg!(windows) {
+        // winget, Scoop and Chocolatey, in case they were set up after login.
+        let env = |k: &str| std::env::var_os(k).map(PathBuf::from);
+        dirs.extend(env("LOCALAPPDATA").map(|d| d.join(r"Microsoft\WinGet\Links")));
+        dirs.extend(env("USERPROFILE").map(|d| d.join(r"scoop\shims")));
+        dirs.extend(env("ProgramData").map(|d| d.join(r"chocolatey\bin")));
+    } else {
+        dirs.extend(["/opt/homebrew/bin", "/usr/local/bin", "/usr/bin"].map(PathBuf::from));
+    }
     if let Ok(exe) = std::env::current_exe() {
         if let Some(d) = exe.parent() {
             dirs.push(d.to_path_buf());
             dirs.push(d.join("../Resources")); // macOS .app bundle
         }
     }
-    if let Some(path) = std::env::var_os("PATH") {
-        dirs.extend(std::env::split_paths(&path));
-    }
-    dirs.extend(["/opt/homebrew/bin", "/usr/local/bin", "/usr/bin"].map(PathBuf::from));
     dirs.into_iter().map(|d| d.join(&exe_name)).find(|p| p.is_file())
 }
 
@@ -203,6 +212,10 @@ impl Job {
 
     pub fn cancel(&self) {
         self.cancel.store(true, Ordering::Relaxed);
+    }
+
+    pub fn is_cancelled(&self) -> bool {
+        self.cancel.load(Ordering::Relaxed)
     }
 
     fn work(&self) {

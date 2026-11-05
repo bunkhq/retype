@@ -38,6 +38,7 @@ impl Toast {
     pub fn new(cc: &eframe::CreationContext<'_>, sources: Vec<PathBuf>, target: String) -> Self {
         theme::install(&cc.egui_ctx);
         crate::ipc::set_waker(&cc.egui_ctx);
+        crate::platform::round_corners(cc);
         let c = cc.egui_ctx.clone();
         theme::spring_set(&cc.egui_ctx, egui::Id::unique("toast-in"), 60.0, 0.0);
         let files = crate::app::expand(&sources);
@@ -59,7 +60,7 @@ impl Toast {
 
 impl eframe::App for Toast {
     fn clear_color(&self, _: &egui::Visuals) -> [f32; 4] {
-        [0.0; 4]
+        crate::platform::clear_color()
     }
 
     fn ui(&mut self, ui: &mut egui::Ui, frame: &mut eframe::Frame) {
@@ -106,11 +107,16 @@ impl eframe::App for Toast {
         let ready = self.finished_at.is_some() && !outputs.is_empty();
 
         // Slides in from the screen edge on a spring.
+        // Not on Windows: its opaque window would show the card sliding inside a fixed box.
         let slide = theme::spring_with(&ctx, egui::Id::unique("toast-in"), 0.0, 520.0, 26.0);
-        let card = ui.max_rect().shrink(1.0).translate(Vec2::new(slide, 0.0));
+        let slide = if crate::platform::TRANSPARENT_WINDOW { slide } else { 0.0 };
+        let card = if crate::platform::TRANSPARENT_WINDOW { ui.max_rect().shrink(1.0) } else { ui.max_rect() }.translate(Vec2::new(slide, 0.0));
         let p = ui.painter().clone();
-        p.rect_filled(card, CornerRadius::same(14), theme::paper());
-        p.rect_stroke(card, CornerRadius::same(14), Stroke::new(1.0, theme::line()), StrokeKind::Inside);
+        let radius = CornerRadius::same(crate::platform::card_radius(14));
+        p.rect_filled(card, radius, theme::paper());
+        if !crate::platform::os_rounds_corners() {
+            p.rect_stroke(card, radius, Stroke::new(1.0, theme::line()), StrokeKind::Inside);
+        }
 
         let resp = ui.interact(card, ui.scope_id().with("toast"), Sense::click_and_drag());
         let resp = if ready { resp.on_hover_text("Drag into any app. Click to open.") } else { resp };

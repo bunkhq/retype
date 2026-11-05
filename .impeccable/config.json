@@ -1,0 +1,26 @@
+{
+  "detector": {
+    "ignoreRules": [],
+    "ignoreFiles": [],
+    "ignoreValues": [
+      {
+        "rule": "cramped-padding",
+        "value": "*",
+        "files": [
+          "brand/exploration/round-1-themed.html"
+        ],
+        "createdAt": "2026-11-04T23:40:34.783Z",
+        "reason": "agent: full-bleed board sections pad their inner .gut wrappers; mac-bar is a 30px centered title bar"
+      },
+      {
+        "rule": "cramped-padding",
+        "value": "*",
+        "files": [
+          "brand/exploration/round-2-restrained.html"
+        ],
+        "createdAt": "2026-11-04T23:57:24.354Z",
+        "reason": "agent: full-bleed boards pad inner .gut/.wrap; window title bars are centered 30px OS chrome"
+      }
+    ]
+  }
+}

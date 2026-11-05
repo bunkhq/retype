@@ -1,0 +1,279 @@
+{
+  "schemaVersion": 2,
+  "generatedAt": "2026-11-05T00:03:13Z",
+  "title": "Design System: Retype",
+  "extensions": {
+    "colorMeta": {
+      "selection-yellow": {
+        "role": "primary",
+        "displayName": "Selection Yellow",
+        "canonical": "#ffe14a",
+        "oklch": "oklch(90.9% 0.165 98)",
+        "tonalRamp": [
+          "oklch(15% 0.041 98)",
+          "oklch(25% 0.041 98)",
+          "oklch(36% 0.041 98)",
+          "oklch(48% 0.066 98)",
+          "oklch(60% 0.093 98)",
+          "oklch(72% 0.121 98)",
+          "oklch(84% 0.149 98)",
+          "oklch(95% 0.060 98)"
+        ]
+      },
+      "ink": {
+        "role": "neutral",
+        "displayName": "Ink",
+        "canonical": "#111418",
+        "oklch": "oklch(19.0% 0.009 256)",
+        "tonalRamp": [
+          "oklch(15% 0.009 256)",
+          "oklch(25% 0.009 256)",
+          "oklch(36% 0.009 256)",
+          "oklch(48% 0.009 256)",
+          "oklch(60% 0.009 256)",
+          "oklch(72% 0.009 256)",
+          "oklch(84% 0.009 256)",
+          "oklch(95% 0.009 256)"
+        ]
+      },
+      "ink-hover": {
+        "role": "neutral",
+        "displayName": "Ink Lifted",
+        "canonical": "#2a2f36",
+        "oklch": "oklch(30.3% 0.014 257)",
+        "tonalRamp": [
+          "oklch(15% 0.014 257)",
+          "oklch(25% 0.014 257)",
+          "oklch(36% 0.014 257)",
+          "oklch(48% 0.014 257)",
+          "oklch(60% 0.014 257)",
+          "oklch(72% 0.014 257)",
+          "oklch(84% 0.014 257)",
+          "oklch(95% 0.014 257)"
+        ]
+      },
+      "soft": {
+        "role": "neutral",
+        "displayName": "Soft Graphite",
+        "canonical": "#6a7079",
+        "oklch": "oklch(54.3% 0.016 258)",
+        "tonalRamp": [
+          "oklch(15% 0.016 258)",
+          "oklch(25% 0.016 258)",
+          "oklch(36% 0.016 258)",
+          "oklch(48% 0.016 258)",
+          "oklch(60% 0.016 258)",
+          "oklch(72% 0.016 258)",
+          "oklch(84% 0.016 258)",
+          "oklch(95% 0.016 258)"
+        ]
+      },
+      "line": {
+        "role": "neutral",
+        "displayName": "Hairline",
+        "canonical": "#e4e6ea",
+        "oklch": "oklch(92.5% 0.006 265)",
+        "tonalRamp": [
+          "oklch(15% 0.006 265)",
+          "oklch(25% 0.006 265)",
+          "oklch(36% 0.006 265)",
+          "oklch(48% 0.006 265)",
+          "oklch(60% 0.006 265)",
+          "oklch(72% 0.006 265)",
+          "oklch(84% 0.006 265)",
+          "oklch(95% 0.006 265)"
+        ]
+      },
+      "hover-wash": {
+        "role": "neutral",
+        "displayName": "Hover Wash",
+        "canonical": "#f1f2f4",
+        "oklch": "oklch(96.1% 0.003 265)",
+        "tonalRamp": [
+          "oklch(15% 0.003 265)",
+          "oklch(25% 0.003 265)",
+          "oklch(36% 0.003 265)",
+          "oklch(48% 0.003 265)",
+          "oklch(60% 0.003 265)",
+          "oklch(72% 0.003 265)",
+          "oklch(84% 0.003 265)",
+          "oklch(95% 0.003 265)"
+        ]
+      },
+      "paper": {
+        "role": "neutral",
+        "displayName": "Paper",
+        "canonical": "#ffffff",
+        "oklch": "oklch(100% 0 0)",
+        "tonalRamp": [
+          "oklch(15% 0 0)",
+          "oklch(25% 0 0)",
+          "oklch(36% 0 0)",
+          "oklch(48% 0 0)",
+          "oklch(60% 0 0)",
+          "oklch(72% 0 0)",
+          "oklch(84% 0 0)",
+          "oklch(95% 0 0)"
+        ]
+      }
+    },
+    "typographyMeta": {
+      "display": {
+        "displayName": "Display",
+        "purpose": "The file name and its highlighted extension. One per window. Clamp size is a web-mock value (provisional)."
+      },
+      "wordmark": {
+        "displayName": "Wordmark",
+        "purpose": "The name Retype set as type beside the mark."
+      },
+      "body": {
+        "displayName": "Body",
+        "purpose": "Prose, tagline (1.1rem, soft), status (0.95rem), source line (0.9rem, soft)."
+      },
+      "button": {
+        "displayName": "Button",
+        "purpose": "Primary action label, e.g. Save as .mov."
+      },
+      "label": {
+        "displayName": "Label",
+        "purpose": "Format chips."
+      },
+      "caption": {
+        "displayName": "Caption",
+        "purpose": "Quality tag and fine print, in soft."
+      }
+    },
+    "shadows": [],
+    "motion": [
+      {
+        "name": "progress-ease",
+        "value": "cubic-bezier(.3, .6, .2, 1)",
+        "purpose": "Progress fill width. Mock durations (450ms remux, 1500ms re-encode) are simulated."
+      },
+      {
+        "name": "caret-blink",
+        "value": "1.1s steps(1) infinite; 50% opacity 0",
+        "purpose": "PROVISIONAL web-mock caret beside the highlighted extension. Native follows the system caret blink; off under Reduce Motion."
+      }
+    ],
+    "breakpoints": [],
+    "provisional": [
+      "Font loading via Google Fonts; native must bundle Hanken Grotesk 400/600/700.",
+      "Caret blink timing.",
+      "Clamp-based type sizes and window padding.",
+      "Focus ring inherited from the exploration page shell (2px #2b59ff); native uses the system focus ring.",
+      "Mock window frame, title bar and drop shadow; native uses OS chrome.",
+      "Drop-state dashed outline (shared mock scaffold).",
+      "App icon: assets/icon.svg is the drawing; macOS icon grid and size variants not done.",
+      "Neighbour extension colour #b9bdc4 (1.9:1 on paper) is not a token and needs a legible value."
+    ]
+  },
+  "components": [
+    {
+      "name": "Extension Picker",
+      "kind": "custom",
+      "refersTo": "extension-selection",
+      "description": "Signature. File name in display type, a dot, the current extension in a selection highlight with a caret; neighbours above and below. Scroll or arrows to move, click or Enter to convert.",
+      "html": "<div class=\"ds-rt-line\" tabindex=\"0\" role=\"group\" aria-label=\"Choose a format\"><span class=\"ds-rt-name\">interview</span><span>.</span><span class=\"ds-rt-ext\"><span class=\"ds-rt-ghost\" aria-hidden=\"true\">webm</span><button class=\"ds-rt-cur\" type=\"button\" aria-label=\"Convert to mov\">mov</button><span class=\"ds-rt-ghost\" aria-hidden=\"true\">m4v</span></span></div>",
+      "css": ".ds-rt-line { display: flex; align-items: center; font-family: 'Hanken Grotesk', 'Helvetica Neue', Arial, sans-serif; font-weight: 700; font-size: clamp(2.2rem, 6vw, 4.2rem); letter-spacing: -0.035em; line-height: 1; color: #111418; min-width: 0; } .ds-rt-name { overflow: hidden; text-overflow: ellipsis; white-space: nowrap; min-width: 0; } .ds-rt-ext { position: relative; display: grid; justify-items: start; } .ds-rt-ghost { font-size: 0.42em; font-weight: 600; color: #b9bdc4; letter-spacing: -0.01em; height: 1.1em; padding-left: 0.12em; } .ds-rt-cur { background: #ffe14a; color: #111418; border: 0; border-radius: 4px; padding: 0.04em 0.12em 0.08em; font: inherit; letter-spacing: inherit; line-height: 1; position: relative; cursor: pointer; } .ds-rt-cur::after { content: ''; position: absolute; right: -0.09em; top: 0.08em; bottom: 0.08em; width: 0.05em; background: #111418; animation: ds-caret 1.1s steps(1) infinite; } .ds-rt-cur:focus-visible, .ds-rt-line:focus-visible { outline: 2px solid #111418; outline-offset: 6px; } @keyframes ds-caret { 50% { opacity: 0; } } @media (prefers-reduced-motion: reduce) { .ds-rt-cur::after { animation: none; } }"
+    },
+    {
+      "name": "Format Chip",
+      "kind": "chip",
+      "refersTo": "format-chip",
+      "description": "Lowercase .ext chip. Hover washes, selected takes the yellow. Clicking selects and converts.",
+      "html": "<div class=\"ds-rt-list\"><button class=\"ds-chip\" type=\"button\" aria-current=\"true\">.mov</button><button class=\"ds-chip\" type=\"button\">.m4v</button><button class=\"ds-chip\" type=\"button\">.mkv</button><button class=\"ds-chip\" type=\"button\">.webm</button><button class=\"ds-chip\" type=\"button\">.gif</button></div>",
+      "css": ".ds-rt-list { display: flex; flex-wrap: wrap; gap: 4px; } .ds-chip { border: 0; background: none; padding: 6px 10px; border-radius: 6px; font-family: 'Hanken Grotesk', 'Helvetica Neue', Arial, sans-serif; font-weight: 600; font-size: 0.95rem; color: #6a7079; cursor: pointer; } .ds-chip:hover { background: #f1f2f4; color: #111418; } .ds-chip[aria-current='true'] { background: #ffe14a; color: #111418; } .ds-chip:focus-visible { outline: 2px solid #111418; outline-offset: 2px; }"
+    },
+    {
+      "name": "Primary Button",
+      "kind": "button",
+      "refersTo": "button-primary",
+      "description": "Ink fill, paper text. Label follows the selection.",
+      "html": "<button class=\"ds-btn-primary\" type=\"button\">Save as .mov</button>",
+      "css": ".ds-btn-primary { background: #111418; color: #fff; border: 0; border-radius: 8px; padding: 11px 16px; font-family: 'Hanken Grotesk', 'Helvetica Neue', Arial, sans-serif; font-weight: 600; font-size: 1rem; cursor: pointer; } .ds-btn-primary:hover { background: #2a2f36; } .ds-btn-primary:focus-visible { outline: 2px solid #111418; outline-offset: 3px; }"
+    },
+    {
+      "name": "Action Row",
+      "kind": "custom",
+      "refersTo": "button-primary",
+      "description": "Primary button with the quality tag beside it.",
+      "html": "<div class=\"ds-rt-actions\"><button class=\"ds-rt-go\" type=\"button\">Save as .mov</button><span class=\"ds-rt-tag\">Same quality · scroll or use arrows to change</span></div>",
+      "css": ".ds-rt-actions { display: flex; flex-wrap: wrap; align-items: center; gap: 10px 16px; font-family: 'Hanken Grotesk', 'Helvetica Neue', Arial, sans-serif; } .ds-rt-go { background: #111418; color: #fff; border: 0; border-radius: 8px; padding: 11px 16px; font: 600 1rem/1.5 'Hanken Grotesk', 'Helvetica Neue', Arial, sans-serif; cursor: pointer; } .ds-rt-go:hover { background: #2a2f36; } .ds-rt-go:focus-visible { outline: 2px solid #111418; outline-offset: 3px; } .ds-rt-tag { font-size: 0.86rem; color: #6a7079; }"
+    },
+    {
+      "name": "Progress and Status",
+      "kind": "custom",
+      "refersTo": "progress-track",
+      "description": "3px progress bar and one plain status line; the saved file name gets the selection highlight.",
+      "html": "<div class=\"ds-rt-done\"><div class=\"ds-prog\"><i></i></div><p class=\"ds-status\">Saved <b>interview.mov</b> next to the original.</p></div>",
+      "css": ".ds-rt-done { display: grid; gap: 18px; font-family: 'Hanken Grotesk', 'Helvetica Neue', Arial, sans-serif; color: #111418; } .ds-prog { height: 3px; border-radius: 2px; overflow: hidden; background: #e4e6ea; } .ds-prog i { display: block; height: 100%; width: 100%; background: #111418; transition: width 450ms cubic-bezier(.3,.6,.2,1); } .ds-status { margin: 0; font-size: 0.95rem; line-height: 1.5; } .ds-status b { background: #ffe14a; padding: 0 3px; border-radius: 3px; font-weight: 600; }"
+    },
+    {
+      "name": "Mark",
+      "kind": "custom",
+      "refersTo": "mark",
+      "description": "Dot, selected extension, caret. Rounded square at 22.5% with a hairline outline.",
+      "html": "<span class=\"ds-mark\"><svg viewBox=\"0 0 100 100\" aria-hidden=\"true\"><rect width=\"100\" height=\"100\" fill=\"#fff\"/><rect x=\"0.5\" y=\"0.5\" width=\"99\" height=\"99\" rx=\"22\" fill=\"none\" stroke=\"#e4e6ea\"/><circle cx=\"24\" cy=\"62\" r=\"7\" fill=\"#111418\"/><rect x=\"36\" y=\"34\" width=\"44\" height=\"34\" rx=\"5\" fill=\"#ffe14a\"/><rect x=\"77\" y=\"28\" width=\"5\" height=\"46\" rx=\"1\" fill=\"#111418\"/></svg></span>",
+      "css": ".ds-mark { display: block; width: 76px; height: 76px; border-radius: 22.5%; overflow: hidden; } .ds-mark svg { display: block; width: 100%; height: 100%; }"
+    }
+  ],
+  "narrative": {
+    "northStar": "The Selected Extension",
+    "overview": "Retype is a white page, black ink, and one yellow: the colour of selected text. The whole interface is a file name set large in bold, with the part after the dot highlighted as if you had just selected it to type a new one. Moving through formats (scroll wheel or arrow keys) swaps the highlighted extension in place; one click saves. The brand is that moment, and nothing is added on top of it.\n\nThe system is restrained by construction. One typeface, two neutrals plus a hairline grey, one accent. No gradients, no shadows inside the window, no illustration, no metaphor costume. Density is low: a single column of four rows (source line, file name, format list and action, progress and status) inside a plain window.\n\nYellow means \"selected\". Wherever it appears (the current extension, the chosen chip, the file name in the done message, the system text selection, the mark) it marks the text that is chosen or about to change. It never decorates.",
+    "keyCharacteristics": [
+      "White paper, ink text, one selection-yellow accent.",
+      "One family, Hanken Grotesk; bold for the file name, 600 for controls, regular for prose.",
+      "The file name is the display type; the extension is the picker.",
+      "Lowercase extensions with their dot, everywhere.",
+      "Flat: hairlines and the yellow fill carry all structure."
+    ],
+    "rules": [
+      {
+        "name": "The Selection Rule",
+        "body": "Yellow appears only behind text that is selected, chosen, or just produced. If nothing on screen is selected, no yellow shows except the mark.",
+        "section": "colors"
+      },
+      {
+        "name": "The Fill-Not-Ink Rule",
+        "body": "Yellow never sets text or strokes. On paper it is 1.3:1; it only works as a fill behind ink (14.2:1).",
+        "section": "colors"
+      },
+      {
+        "name": "The One Family Rule",
+        "body": "Hanken Grotesk only. Hierarchy comes from size, weight (400 / 600 / 700) and tracking, never from a second face.",
+        "section": "typography"
+      },
+      {
+        "name": "The Lowercase Dot Rule",
+        "body": "Extensions are written lowercase with their leading dot (\".mov\", \"Save as .mov\"). In the display line the dot is its own glyph and the highlight covers only the letters after it.",
+        "section": "typography"
+      },
+      {
+        "name": "The Extension Never Truncates Rule",
+        "body": "When space runs out, the file name gives way with an ellipsis. The dot and the highlighted extension always stay whole and visible.",
+        "section": "layout"
+      },
+      {
+        "name": "The Flat Window Rule",
+        "body": "Nothing inside the window casts a shadow. Selection is shown by the yellow fill, hover by the wash.",
+        "section": "elevation"
+      }
+    ],
+    "dos": [
+      "**Do** keep yellow (`selection-yellow`) to selected or just-produced text: the current extension, the chosen chip, the saved file name, text selection.",
+      "**Do** set the file name in 700 display type and let it truncate before the extension does.",
+      "**Do** write extensions lowercase with their dot.",
+      "**Do** use soft graphite for anything secondary and ink for anything the user acts on.",
+      "**Do** make every format reachable by scroll wheel and arrow keys, and conversion one click or Enter.",
+      "**Do** write status lines as plain past-tense facts (\"Saved interview.mov next to the original.\")."
+    ],
+    "donts": [
+      "**Don't** use yellow as text, borders, or a background panel; it is a fill behind ink only.",
+      "**Don't** add a second typeface, a monospace, or uppercase extensions.",
+      "**Don't** put shadows, gradients, or illustration inside the window.",
+      "**Don't** use a converter-arrows icon or any arrow-between-files motif; the mark is the dot, the selection, and the caret.",
+      "**Don't** write slogans or buzzwords in the UI (\"blazing fast\", \"seamless\", \"magic\")."
+    ]
+  }
+}

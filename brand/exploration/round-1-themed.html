@@ -1,0 +1,1058 @@
+<title>Same File, New Wrapper</title>
+<meta name="claude:viewport-fit-sides" content="cover">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Archivo:wdth,wght@62..125,400..900&family=Barlow:wght@400;600&family=Barlow+Condensed:wght@500;700&family=Big+Shoulders+Stencil:wght@700;900&family=Courier+Prime:wght@400;700&family=Geist:wght@400;500;600&family=Geist+Mono:wght@400;500&family=Schibsted+Grotesk:wght@500;700;800&display=swap">
+<style>
+/* Layout: a quiet shell (title, index, closing notes) around three full-bleed boards.
+   Each board commits to its own world; only the shell follows the viewer's theme. */
+:root {
+  --bg: #f4f5f7;
+  --fg: #15181c;
+  --muted: #545c66;
+  --rule: #d5dae0;
+  --focus: #2b59ff;
+  --shell: "Geist", ui-sans-serif, system-ui, sans-serif;
+  --shell-mono: "Geist Mono", ui-monospace, "SF Mono", Menlo, monospace;
+
+  /* Enclose */
+  --e-ink: #1b2775;
+  --e-ink-2: #2b3c9e;
+  --e-line: #c9d1ee;
+  --e-paper: #fbfcff;
+  --e-glass: rgba(214, 224, 242, 0.88);
+  --e-red: #d1281e;
+  --e-text: #172058;
+  --e-display: "Schibsted Grotesk", "Helvetica Neue", Arial, sans-serif;
+  --e-type: "Courier Prime", "Courier New", monospace;
+
+  /* Transship */
+  --t-oxide: #9b3a24;
+  --t-oxide-dk: #7c2c1a;
+  --t-oxide-lt: #b04a31;
+  --t-slate: #2d5672;
+  --t-slate-dk: #22445b;
+  --t-slate-lt: #3a6886;
+  --t-hull: #23282c;
+  --t-hull-2: #2f353a;
+  --t-plate: #c7cccf;
+  --t-yellow: #f1bf2c;
+  --t-white: #eef1f0;
+  --t-black: #121517;
+  --t-display: "Big Shoulders Stencil", "Arial Narrow", sans-serif;
+  --t-text: "Barlow", "Helvetica Neue", Arial, sans-serif;
+  --t-label: "Barlow Condensed", "Arial Narrow", sans-serif;
+
+  /* Livery */
+  --l-lemon: #ffd400;
+  --l-black: #111111;
+  --l-white: #ffffff;
+  --l-cobalt: #2340c8;
+  --l-green: #0b7a4b;
+  --l-vermilion: #e8432a;
+  --l-violet: #6a3fd0;
+  --l-text: #1d1a00;
+  --l-face: "Archivo", "Helvetica Neue", Arial, sans-serif;
+}
+@media (prefers-color-scheme: dark) {
+  :root:not([data-theme="light"]) {
+    --bg: #101215; --fg: #e8ebef; --muted: #9aa3ae; --rule: #2a3037; --focus: #8aa6ff;
+    color-scheme: dark;
+  }
+}
+:root[data-theme="dark"] {
+  --bg: #101215; --fg: #e8ebef; --muted: #9aa3ae; --rule: #2a3037; --focus: #8aa6ff;
+  color-scheme: dark;
+}
+
+* { box-sizing: border-box; }
+body { margin: 0; background: var(--bg); color: var(--fg); font-family: var(--shell); font-size: 16px; line-height: 1.55; }
+::selection { background: var(--focus); color: #fff; }
+:focus-visible { outline: 2px solid var(--focus); outline-offset: 3px; }
+h1, h2, h3, h4 { text-wrap: balance; margin: 0; }
+p { margin: 0; }
+a { color: inherit; text-underline-offset: 0.2em; }
+
+.gut { padding-left: max(16px, env(safe-area-inset-left, 0px)); padding-right: max(16px, env(safe-area-inset-right, 0px)); }
+.wrap { max-width: 1200px; margin: 0 auto; }
+
+/* ---------- Shell ---------- */
+.intro { padding-block: clamp(40px, 7vw, 88px) clamp(28px, 4vw, 48px); }
+.intro h1 { font-size: clamp(2.25rem, 5.4vw, 4rem); font-weight: 600; letter-spacing: -0.035em; line-height: 1.02; }
+.intro .lede { margin-top: 20px; max-width: 62ch; font-size: 1.125rem; color: var(--muted); }
+.intro .lede strong { color: var(--fg); font-weight: 500; }
+.index { margin-top: 36px; display: grid; grid-template-columns: repeat(auto-fit, minmax(240px, 1fr)); border-top: 1px solid var(--rule); }
+.index a { display: grid; grid-template-columns: 44px 1fr; gap: 14px; align-items: center; padding: 18px 16px 18px 0; text-decoration: none; border-bottom: 1px solid var(--rule); }
+.index a:hover .idx-name { text-decoration: underline; }
+.idx-name { font-weight: 600; font-size: 1.05rem; }
+.idx-line { color: var(--muted); font-size: 0.9rem; line-height: 1.35; }
+.index .icon { width: 44px; height: 44px; }
+.meta-line { margin-top: 18px; font-size: 0.85rem; color: var(--muted); }
+
+/* Shared app-icon squircle */
+.icon { border-radius: 22.5%; overflow: hidden; flex: none; display: block; }
+.icon svg { display: block; width: 100%; height: 100%; }
+
+/* Shared board scaffolding */
+.board { position: relative; overflow: hidden; }
+.board-hero { padding-block: clamp(40px, 6vw, 80px) clamp(32px, 5vw, 64px); position: relative; }
+.stage { position: relative; }
+.controls { display: flex; flex-wrap: wrap; gap: 12px 18px; align-items: center; margin-top: 28px; }
+.chips { display: flex; flex-wrap: wrap; gap: 6px; }
+.chip, .run { font: inherit; cursor: pointer; border: 0; }
+.status { min-height: 1.5em; flex: 1 1 260px; }
+.spec { padding-block: clamp(36px, 5vw, 64px); }
+.spec-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(250px, 1fr)); gap: 0; }
+.spec-block { padding: 24px; min-width: 0; }
+.spec-block h3 { font-size: 0.8rem; text-transform: uppercase; letter-spacing: 0.1em; margin-bottom: 18px; }
+.icons-row { display: flex; align-items: flex-end; gap: 14px; flex-wrap: wrap; }
+.icons-row .i128 { width: 112px; height: 112px; }
+.icons-row .i64 { width: 56px; height: 56px; }
+.icons-row .i32 { width: 32px; height: 32px; }
+.glyph16 { width: 20px; height: 20px; display: block; }
+.mark-note { margin-top: 16px; font-size: 0.86rem; line-height: 1.45; }
+.swatches { display: grid; gap: 8px; }
+.sw { display: grid; grid-template-columns: 40px 1fr auto; gap: 12px; align-items: center; font-size: 0.86rem; }
+.sw i { display: block; width: 40px; height: 28px; border-radius: 3px; }
+.sw code { font-size: 0.78rem; font-variant-numeric: tabular-nums; }
+.typeset { display: grid; gap: 16px; }
+.typeset .ts-name { font-size: 0.78rem; opacity: 0.8; }
+.voice { display: grid; gap: 14px; margin: 0; }
+.voice dt { font-size: 0.74rem; text-transform: uppercase; letter-spacing: 0.08em; opacity: 0.75; }
+.voice dd { margin: 2px 0 0; font-size: 0.98rem; line-height: 1.4; }
+.context { display: grid; grid-template-columns: minmax(0, 2fr) minmax(0, 1fr); gap: 28px; align-items: start; margin-top: 40px; }
+.context h3, .notes h3 { font-size: 0.8rem; text-transform: uppercase; letter-spacing: 0.1em; margin-bottom: 14px; }
+.notes { display: grid; grid-template-columns: repeat(auto-fit, minmax(240px, 1fr)); gap: 28px; margin-top: 44px; padding-top: 28px; }
+.notes p, .notes li { font-size: 0.95rem; line-height: 1.5; max-width: 60ch; }
+.notes ul { margin: 0; padding-left: 1.1em; display: grid; gap: 6px; }
+
+/* macOS window frame (OS chrome stays OS) */
+.mac { border-radius: 12px; overflow: hidden; box-shadow: 0 24px 50px -24px rgba(0,0,0,.55), 0 0 0 0.5px rgba(0,0,0,.35); }
+.mac-bar { height: 30px; display: flex; align-items: center; gap: 8px; padding: 0 12px; font: 600 12px/1 var(--shell); }
+.mac-bar b { width: 12px; height: 12px; border-radius: 50%; display: block; }
+.mac-bar b:nth-child(1) { background: #ff5f57; } .mac-bar b:nth-child(2) { background: #febc2e; } .mac-bar b:nth-child(3) { background: #28c840; }
+.mac-bar span { flex: 1; text-align: center; margin-right: 52px; }
+.menu { border-radius: 8px; padding: 5px; font: 13px/1 var(--shell); background: #f2f2f3; color: #1d1d1f; box-shadow: 0 14px 34px -12px rgba(0,0,0,.5), 0 0 0 0.5px rgba(0,0,0,.25); max-width: 300px; }
+.menu div { padding: 6px 10px; border-radius: 5px; display: flex; align-items: center; gap: 8px; }
+.menu hr { border: 0; border-top: 1px solid #d5d5d8; margin: 4px 6px; }
+.menu .sub { justify-content: space-between; }
+.menu .sub svg { width: 8px; height: 10px; }
+.menu .hot { color: #fff; }
+.menu .hot .icon { width: 16px; height: 16px; border-radius: 4px; }
+.menu-cap { margin-top: 10px; font-size: 0.82rem; line-height: 1.4; }
+
+/* ================= ENCLOSE ================= */
+.enc { background: var(--e-ink); color: #fff; }
+.enc-hero {
+  background-color: var(--e-ink);
+  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='28' height='14' viewBox='0 0 28 14'%3E%3Cpath d='M0 7 Q7 1 14 7 T28 7' fill='none' stroke='%232a3a96' stroke-width='1.2'/%3E%3Cpath d='M0 14 Q7 8 14 14 T28 14 M0 0 Q7 -6 14 0 T28 0' fill='none' stroke='%23243290' stroke-width='1'/%3E%3C/svg%3E");
+}
+.enc-head { display: flex; flex-wrap: wrap; align-items: baseline; justify-content: space-between; gap: 8px 32px; }
+.enc-word { font-family: var(--e-display); font-weight: 800; font-size: clamp(3.4rem, 11vw, 6rem); letter-spacing: -0.04em; line-height: 0.9; }
+.enc-word .win { display: inline-block; width: 0.36em; height: 0.2em; border: 0.05em solid #fff; border-radius: 0.04em; margin-left: 0.06em; vertical-align: 0.06em; }
+.enc-tag { font-family: var(--e-type); font-size: clamp(1rem, 1.8vw, 1.25rem); color: var(--e-line); }
+.enc-stage { margin-top: clamp(32px, 5vw, 56px); display: grid; grid-template-columns: minmax(0, 1fr) 2px minmax(0, 1fr); gap: clamp(14px, 3vw, 40px); align-items: center; }
+.enc-axis { align-self: stretch; background: repeating-linear-gradient(to bottom, var(--e-line) 0 6px, transparent 6px 12px); opacity: 0.6; }
+.enc-env { container-type: inline-size; aspect-ratio: 2.3 / 1; background: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 230 100' preserveAspectRatio='none'%3E%3Cpath d='M0 100 L96 52 M230 100 L134 52 M0 0 L115 58 L230 0' fill='none' stroke='%231b2775' stroke-opacity='.07' stroke-width='.6' vector-effect='non-scaling-stroke'/%3E%3C/svg%3E") center / 100% 100% no-repeat, var(--e-paper); color: var(--e-text); border-radius: 3px; position: relative; box-shadow: 0 22px 40px -20px rgba(3, 8, 40, .7), 0 2px 4px rgba(3, 8, 40, .3); }
+.enc-ret { position: absolute; top: 7%; left: 5%; font: 400 2.6cqw/1.25 var(--e-type); }
+.enc-ret b { display: block; font-weight: 700; }
+.enc-priv { position: absolute; top: 30%; left: 5%; font: 700 2.2cqw/1 var(--e-display); letter-spacing: 0.12em; color: var(--e-red); text-transform: uppercase; }
+.enc-indicia { position: absolute; top: 7%; right: 5%; width: 25%; border: 0.35cqw solid var(--e-text); padding: 1.4cqw 1.6cqw; font: 700 1.9cqw/1.2 var(--e-display); letter-spacing: 0.06em; text-transform: uppercase; text-align: center; }
+.enc-indicia small { display: block; font: 400 1.8cqw/1.2 var(--e-type); letter-spacing: 0; text-transform: none; margin-top: 0.8cqw; }
+.enc-window { position: absolute; left: 5%; bottom: 11%; width: 54%; height: 40%; border-radius: 1.6cqw; overflow: hidden; background-color: var(--e-glass); box-shadow: inset 0 0 0 0.3cqw rgba(23, 32, 88, .18); display: flex; flex-direction: column; justify-content: center; padding: 0 4cqw; transition: background-color .3s; }
+.enc-window.empty { background-color: #d3dbf1; background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='16' height='8' viewBox='0 0 16 8'%3E%3Cpath d='M0 4 Q4 0 8 4 T16 4' fill='none' stroke='%231b2775' stroke-width='1.1' stroke-opacity='.55'/%3E%3C/svg%3E"); }
+.enc-window .fn { font: 700 3.6cqw/1.2 var(--e-type); white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+.enc-window .mt { font: 400 2.5cqw/1.3 var(--e-type); opacity: .8; }
+.enc-window.empty .fn, .enc-window.empty .mt { visibility: hidden; }
+.enc-fmt { position: absolute; right: 5%; bottom: 8%; font: 800 13cqw/0.85 var(--e-display); letter-spacing: -0.04em; color: var(--e-ink); }
+/* Mirror: the source envelope reads as the reflection of the result across the fold axis */
+.enc-env--from .enc-window { left: auto; right: 5%; }
+.enc-env--from .enc-fmt { right: auto; left: 5%; }
+.enc-env--from .enc-ret { left: auto; right: 5%; text-align: right; }
+.enc-env--from .enc-priv { left: auto; right: 5%; }
+.enc-env--from .enc-indicia { right: auto; left: 5%; }
+.enc-env--from { opacity: 0.94; }
+.enc-letter { position: absolute; left: 0; top: 0; width: 0; aspect-ratio: 1 / 1.25; background: #fff; border-radius: 2px; box-shadow: 0 16px 30px -12px rgba(3, 8, 40, .7); color: var(--e-text); padding: 12px; font: 400 11px/1.3 var(--e-type); pointer-events: none; opacity: 0; z-index: 2; display: flex; flex-direction: column; gap: 6%; }
+.enc-letter .frames { flex: 1; border-radius: 2px; background:
+  linear-gradient(var(--e-ink) 0 0) 0 0 / 100% 12% no-repeat,
+  linear-gradient(var(--e-ink) 0 0) 0 100% / 100% 12% no-repeat,
+  linear-gradient(135deg, #6a7bd0, #1b2775); }
+.enc-letter .lf { font-weight: 700; word-break: break-all; }
+.enc-controls { color: var(--e-line); }
+.enc .chip { background: transparent; color: var(--e-line); border: 1px solid rgba(201, 209, 238, .45); padding: 6px 12px; border-radius: 999px; font: 400 0.88rem/1 var(--e-type); }
+.enc .chip[aria-pressed="true"] { background: var(--e-paper); color: var(--e-ink); border-color: var(--e-paper); }
+.enc .chip:hover { border-color: var(--e-paper); }
+.enc .run { background: var(--e-red); color: #fff; padding: 12px 20px; border-radius: 3px; font: 700 0.95rem/1 var(--e-display); letter-spacing: 0.02em; }
+.enc .run:hover { background: #b51f16; }
+.enc .run:disabled { opacity: .6; cursor: progress; }
+.enc .status { font-family: var(--e-type); color: #fff; }
+.enc :focus-visible { outline-color: #fff; }
+
+.enc-sheet { background: var(--e-paper); color: var(--e-text); }
+.enc-sheet .spec-grid { border-top: 1px solid var(--e-line); }
+.enc-sheet .spec-block { border-bottom: 1px solid var(--e-line); }
+.enc-sheet .spec-block + .spec-block { border-left: 1px solid var(--e-line); }
+.enc-sheet h3 { font-family: var(--e-display); color: var(--e-ink); }
+.enc-sheet .voice dt { font-family: var(--e-display); }
+.enc-sheet .voice dd { font-family: var(--e-type); }
+.enc-sheet .notes { border-top: 6px solid transparent; border-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='16' height='6' viewBox='0 0 16 6'%3E%3Cpath d='M0 3 Q4 0 8 3 T16 3' fill='none' stroke='%231b2775' stroke-width='1.2'/%3E%3C/svg%3E") 0 0 100% 0 / 6px 0 0 0 round; }
+.enc-sheet .raises li b { color: var(--e-red); font-weight: 700; }
+.enc-app { background: var(--e-paper); color: var(--e-text); }
+.enc-app .mac-bar { background: #e9ecf4; color: #4a4f63; }
+.enc-app-body { padding: 22px; display: grid; gap: 18px; background: #fff; }
+.enc-drop { border: 1.5px solid var(--e-ink); border-radius: 4px; padding: 22px 18px; display: grid; grid-template-columns: auto 1fr; gap: 18px; align-items: center; background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='16' height='8' viewBox='0 0 16 8'%3E%3Cpath d='M0 4 Q4 0 8 4 T16 4' fill='none' stroke='%231b2775' stroke-width='1' stroke-opacity='.12'/%3E%3C/svg%3E"); }
+.enc-drop svg { width: 64px; height: 40px; }
+.enc-drop b { font: 800 1.3rem/1.1 var(--e-display); letter-spacing: -0.02em; display: block; }
+.enc-drop span { font: 400 0.85rem/1.3 var(--e-type); }
+.enc-rows { display: grid; gap: 0; font: 400 0.85rem/1.3 var(--e-type); }
+.enc-rows div { display: grid; grid-template-columns: minmax(0, 1fr) auto; gap: 12px; padding: 10px 0; border-top: 1px solid var(--e-line); }
+.enc-rows div span:first-child { overflow-wrap: anywhere; }
+.enc-rows em { font-style: normal; color: var(--e-ink-2); }
+.enc-rows .warn em { color: var(--e-red); }
+.enc-foot { font: 700 0.72rem/1 var(--e-display); letter-spacing: 0.12em; text-transform: uppercase; color: var(--e-red); }
+.enc .menu .hot { background: var(--e-ink); }
+
+/* ================= TRANSSHIP ================= */
+.ts { background: var(--t-hull); color: var(--t-white); }
+.ts-wall {
+  background:
+    repeating-linear-gradient(90deg, var(--t-oxide) 0 22px, var(--t-oxide-dk) 22px 26px, var(--t-oxide-lt) 26px 30px, var(--t-oxide) 30px 44px);
+  border-bottom: 10px solid var(--t-black);
+}
+.ts-word { font-family: var(--t-display); font-weight: 900; font-size: clamp(3.2rem, 12vw, 6rem); line-height: 0.85; letter-spacing: 0.01em; color: var(--t-white); text-transform: uppercase; }
+.ts-codes { margin-top: 18px; display: flex; flex-wrap: wrap; gap: 10px 28px; align-items: baseline; font-family: var(--t-display); font-weight: 700; font-size: clamp(1.3rem, 2.6vw, 1.9rem); letter-spacing: 0.06em; }
+.ts-codes .chk { display: inline-block; border: 3px solid currentColor; padding: 0 0.2em; margin-left: 0.15em; line-height: 1.05; }
+.ts-codes small { font-family: var(--t-label); font-weight: 700; font-size: 1.05rem; letter-spacing: 0.08em; }
+.ts-tag { margin-top: 14px; font: 600 1.15rem/1.3 var(--t-text); color: var(--t-white); }
+.ts-quay { padding-block: 0 clamp(32px, 5vw, 56px); background: var(--t-hull); }
+.ts-beam { height: 14px; background: repeating-linear-gradient(-45deg, var(--t-yellow) 0 14px, var(--t-black) 14px 28px); margin-bottom: clamp(56px, 8vw, 96px); }
+.ts-stage { display: grid; grid-template-columns: minmax(0, 1fr) minmax(0, 1fr); gap: clamp(14px, 4vw, 56px); align-items: end; }
+.ts-box { container-type: inline-size; aspect-ratio: 2.35 / 1; position: relative; border-radius: 2px; box-shadow: 0 18px 30px -16px rgba(0,0,0,.8); }
+.ts-box--from { background: repeating-linear-gradient(90deg, var(--t-oxide) 0 4.5cqw, var(--t-oxide-dk) 4.5cqw 5.3cqw, var(--t-oxide-lt) 5.3cqw 6.1cqw, var(--t-oxide) 6.1cqw 8.6cqw); }
+.ts-box--to { background: repeating-linear-gradient(90deg, var(--t-slate) 0 4.5cqw, var(--t-slate-dk) 4.5cqw 5.3cqw, var(--t-slate-lt) 5.3cqw 6.1cqw, var(--t-slate) 6.1cqw 8.6cqw); }
+.ts-box::before, .ts-box::after { content: ""; position: absolute; top: 0; bottom: 0; width: 3.4cqw; background: linear-gradient(var(--t-black) 0 0) 0 0 / 100% 7% no-repeat, linear-gradient(var(--t-black) 0 0) 0 100% / 100% 7% no-repeat, rgba(0,0,0,.28); }
+.ts-box::before { left: 0; } .ts-box::after { right: 0; }
+.ts-fmt { position: absolute; left: 7%; top: 9%; font: 900 15cqw/0.85 var(--t-display); color: var(--t-white); text-transform: uppercase; }
+.ts-fmt.long { font-size: 11.5cqw; }
+.ts-code { position: absolute; left: 7%; bottom: 10%; font: 700 4.2cqw/1 var(--t-display); letter-spacing: 0.06em; color: var(--t-white); }
+.ts-bay { position: absolute; right: 7%; top: 14%; width: 46%; height: 72%; background: rgba(10, 12, 14, .82); border: 0.6cqw solid var(--t-black); display: flex; align-items: flex-end; justify-content: center; padding: 3cqw 2.5cqw; }
+.ts-cargo { display: flex; gap: 1.2cqw; align-items: flex-end; width: 100%; }
+.ts-crate { flex: 1; background: var(--t-white); color: var(--t-black); border: 2px solid var(--t-black); padding: 6px 4px 5px; text-align: center; font: 700 clamp(9px, 1.05vw, 13px)/1.05 var(--t-label); text-transform: uppercase; letter-spacing: 0.04em; min-width: 0; }
+.ts-crate b { display: block; font-family: var(--t-display); font-weight: 900; font-size: 1.35em; letter-spacing: 0.02em; }
+.ts-crate.repacked { background: var(--t-yellow); }
+.ts-cargo.flying { position: absolute; z-index: 3; margin: 0; }
+.ts-seal { display: inline-flex; align-items: center; gap: 10px; background: var(--t-yellow); color: var(--t-black); padding: 7px 12px 7px 9px; font: 700 0.9rem/1 var(--t-label); letter-spacing: 0.08em; text-transform: uppercase; clip-path: polygon(0 0, 100% 0, 100% 100%, 0 100%, 6px 50%); }
+.ts-seal i { width: 12px; height: 12px; border-radius: 50%; background: var(--t-hull); display: block; }
+.ts-seal.broken { background: var(--t-white); }
+.ts .chip { background: var(--t-hull-2); color: var(--t-white); padding: 8px 12px; font: 700 0.95rem/1 var(--t-label); letter-spacing: 0.06em; text-transform: uppercase; border: 1px solid #454c52; }
+.ts .chip[aria-pressed="true"] { background: var(--t-white); color: var(--t-black); border-color: var(--t-white); }
+.ts .chip:hover { border-color: var(--t-white); }
+.ts .run { background: var(--t-yellow); color: var(--t-black); padding: 12px 20px; font: 900 1.15rem/1 var(--t-display); letter-spacing: 0.06em; text-transform: uppercase; }
+.ts .run:hover { background: #ffd24a; }
+.ts .run:disabled { opacity: .6; cursor: progress; }
+.ts .status { font: 600 1rem/1.4 var(--t-text); }
+.ts :focus-visible { outline-color: var(--t-yellow); }
+
+.ts-sheet { background: var(--t-hull); }
+.ts-sheet .spec-grid { gap: 14px; }
+.ts-sheet .spec-block { background: var(--t-plate); color: var(--t-black); border-radius: 2px; position: relative; padding: 26px 24px 24px; border-top: 6px solid var(--t-black); }
+.ts-sheet h3 { font-family: var(--t-display); font-weight: 900; font-size: 1.15rem; letter-spacing: 0.08em; }
+.ts-sheet .voice dt { font-family: var(--t-label); font-weight: 700; }
+.ts-sheet .voice dd { font-family: var(--t-text); }
+.ts-sheet .context h3, .ts-sheet .notes h3 { color: var(--t-yellow); }
+.ts-sheet .notes { border-top: 3px solid var(--t-yellow); }
+.ts-sheet .notes p, .ts-sheet .notes li, .ts-sheet .menu-cap { font-family: var(--t-text); }
+.ts-app .mac-bar { background: #33393e; color: #b9c0c5; }
+.ts-app-body { background: var(--t-hull); padding: 20px; display: grid; gap: 16px; }
+.ts-dock { border: 2px solid var(--t-yellow); padding: 18px; display: grid; grid-template-columns: auto 1fr; gap: 16px; align-items: center; background: repeating-linear-gradient(-45deg, rgba(241,191,44,.08) 0 10px, transparent 10px 20px); }
+.ts-dock svg { width: 70px; height: 34px; }
+.ts-dock b { font: 900 1.6rem/1 var(--t-display); text-transform: uppercase; letter-spacing: 0.04em; display: block; }
+.ts-dock span { font: 500 0.9rem/1.3 var(--t-label); letter-spacing: 0.05em; text-transform: uppercase; color: #b9c0c5; }
+.ts-manifest { overflow-x: auto; }
+.ts-manifest table { width: 100%; border-collapse: collapse; font: 500 0.88rem/1.2 var(--t-label); letter-spacing: 0.04em; text-transform: uppercase; font-variant-numeric: tabular-nums; }
+.ts-manifest th { text-align: left; color: var(--t-yellow); font-weight: 700; padding: 6px 8px 6px 0; border-bottom: 2px solid var(--t-yellow); }
+.ts-manifest td { padding: 8px 8px 8px 0; border-bottom: 1px solid #3c4349; overflow-wrap: anywhere; color: #c9d0d5; font: inherit; }
+.ts-manifest td.ok { color: var(--t-white); }
+.ts-manifest td.rp { color: var(--t-yellow); }
+.ts .menu .hot { background: var(--t-slate); }
+
+/* ================= LIVERY ================= */
+.lv { background: var(--l-lemon); color: var(--l-text); --spine-x: clamp(16px, 7vw, 96px); }
+.lv::before { content: ""; position: absolute; top: 0; bottom: 0; left: var(--spine-x); width: 46px; background: linear-gradient(90deg, var(--l-black) 0 16px, var(--l-white) 16px 30px, var(--l-black) 30px 46px); }
+.lv .wrap { position: relative; padding-left: calc(var(--spine-x) + 46px + clamp(16px, 3vw, 40px)); max-width: 1320px; }
+.lv-word { font-family: var(--l-face); font-weight: 900; font-stretch: 125%; font-variation-settings: "wdth" 125; font-size: clamp(3.2rem, 11vw, 6rem); line-height: 0.88; letter-spacing: -0.03em; color: var(--l-black); text-transform: uppercase; }
+.lv-tag { margin-top: 14px; font: 700 clamp(1.05rem, 2vw, 1.35rem)/1.25 var(--l-face); font-variation-settings: "wdth" 100; }
+.lv-car { display: block; width: 100%; height: auto; overflow: visible; filter: drop-shadow(0 18px 18px rgba(60, 45, 0, .35)); }
+.lv-car text { font-family: var(--l-face); font-weight: 900; text-transform: uppercase; }
+.lv-stage { margin-top: clamp(20px, 3vw, 36px); display: grid; grid-template-columns: minmax(0, 1fr) minmax(200px, 280px); gap: clamp(16px, 3vw, 36px); align-items: center; }
+.lv-pit { background: var(--l-black); color: #fff; padding: 16px 18px; border-radius: 4px; font-family: var(--l-face); text-transform: uppercase; display: grid; gap: 8px; }
+.lv-pit div { font-weight: 900; font-variation-settings: "wdth" 112; font-size: clamp(1.4rem, 2.3vw, 1.85rem); overflow-wrap: anywhere; line-height: 0.95; letter-spacing: -0.01em; }
+.lv-pit .y { color: var(--l-lemon); }
+.lv-decal-line { margin-top: 6px; padding-top: 10px; border-top: 2px solid #fff; font: 800 0.82rem/1.3 var(--l-face); font-variation-settings: "wdth" 110; letter-spacing: 0.04em; color: #fff; }
+.lv-pit small { font: 600 0.78rem/1.2 var(--l-face); letter-spacing: 0.08em; color: #cfcfcf; }
+.lv .chip { background: transparent; color: var(--l-black); border: 2px solid var(--l-black); padding: 6px 12px; font: 800 0.85rem/1 var(--l-face); font-variation-settings: "wdth" 110; text-transform: uppercase; letter-spacing: 0.03em; border-radius: 999px; }
+.lv .chip[aria-pressed="true"] { background: var(--l-black); color: var(--l-lemon); }
+.lv .run { background: var(--l-black); color: #fff; padding: 13px 22px; border-radius: 999px; font: 900 1rem/1 var(--l-face); font-variation-settings: "wdth" 125; text-transform: uppercase; letter-spacing: 0.02em; }
+.lv .run:hover { color: var(--l-lemon); }
+.lv .run:disabled { opacity: .6; cursor: progress; }
+.lv .status { font: 700 1rem/1.4 var(--l-face); font-variation-settings: "wdth" 100; }
+.lv :focus-visible { outline-color: var(--l-black); }
+
+.lv-sheet .spec-grid { border: 2px solid var(--l-black); }
+.lv-sheet .spec-block { border: 1px solid var(--l-black); font-family: var(--l-face); }
+.lv-sheet .spec-block:nth-child(2) { background: var(--l-black); color: #fff; }
+.lv-sheet .icons-row .icon { box-shadow: 0 0 0 2px var(--l-black); }
+.lv-sheet h3 { font-family: var(--l-face); font-weight: 900; font-variation-settings: "wdth" 125; letter-spacing: 0.02em; font-size: 0.95rem; }
+.lv-sheet .context h3, .lv-sheet .notes h3 { font-family: var(--l-face); font-weight: 900; font-variation-settings: "wdth" 125; }
+.lv-sheet .notes { border-top: 2px solid var(--l-black); font-family: var(--l-face); }
+.lv-sheet .menu-cap { font-family: var(--l-face); }
+.lv-liveries { display: grid; grid-template-columns: repeat(auto-fill, minmax(92px, 1fr)); gap: 10px; margin-top: 18px; }
+.lv-liveries div { aspect-ratio: 1.5; border-radius: 6px; position: relative; overflow: hidden; display: grid; place-items: center; }
+.lv-liveries div::before { content: ""; position: absolute; left: 0; right: 0; top: 50%; height: 26%; transform: translateY(-50%); background: linear-gradient(var(--s1) 0 35%, var(--s2) 35% 65%, var(--s1) 65%); }
+.lv-liveries b { position: relative; background: #fff; color: var(--l-black); border: 2px solid var(--l-black); border-radius: 50%; width: 50px; height: 50px; display: grid; place-items: center; font: 900 0.72rem/1 var(--l-face); font-variation-settings: "wdth" 100; text-transform: uppercase; }
+.lv-app .mac-bar { background: #f3e9b0; color: #5a5000; }
+.lv-app-body { background: var(--l-lemon); padding: 20px; display: grid; gap: 14px; position: relative; overflow: hidden; }
+.lv-app-body::before { content: ""; position: absolute; top: 0; bottom: 0; left: 18px; width: 22px; background: linear-gradient(90deg, var(--l-black) 0 7px, #fff 7px 15px, var(--l-black) 15px); }
+.lv-app-body > * { margin-left: 40px; position: relative; }
+.lv-drop { border: 3px solid var(--l-black); border-radius: 14px; padding: 18px; font-family: var(--l-face); }
+.lv-drop b { font-weight: 900; font-variation-settings: "wdth" 125; font-size: 1.5rem; line-height: 1; text-transform: uppercase; display: block; }
+.lv-drop span { font-size: 0.9rem; }
+.lv-grid { display: grid; gap: 6px; }
+.lv-grid div { display: grid; grid-template-columns: 40px minmax(0, 1fr) auto; grid-template-areas: "r n s"; gap: 2px 10px; align-items: center; background: var(--l-black); color: #fff; border-radius: 6px; padding: 8px 12px 8px 8px; font: 600 0.86rem/1.2 var(--l-face); }
+.lv-grid i { width: 40px; height: 40px; border-radius: 50%; background: #fff; color: var(--l-black); display: grid; place-items: center; font: 900 0.7rem/1 var(--l-face); font-style: normal; font-variation-settings: "wdth" 125; text-transform: uppercase; }
+.lv-grid i { grid-area: r; } .lv-grid span { grid-area: n; white-space: nowrap; } .lv-grid em { grid-area: s; }
+.lv-grid em { font-style: normal; color: var(--l-lemon); font-weight: 800; text-transform: uppercase; font-size: 0.78rem; }
+.lv .menu .hot { background: var(--l-black); }
+
+/* ---------- Closing shell ---------- */
+.closing { padding-block: clamp(48px, 7vw, 88px); }
+.closing h2 { font-size: clamp(1.5rem, 3vw, 2rem); letter-spacing: -0.02em; font-weight: 600; }
+.closing-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(300px, 1fr)); gap: 40px; margin-top: 28px; }
+.closing p, .closing li { color: var(--muted); max-width: 62ch; }
+.closing p strong, .closing li strong { color: var(--fg); font-weight: 500; }
+.folded { list-style: none; padding: 0; margin: 14px 0 0; display: grid; gap: 0; border-top: 1px solid var(--rule); }
+.folded li { padding: 12px 0; border-bottom: 1px solid var(--rule); font-size: 0.92rem; line-height: 1.45; }
+.closing ol { margin: 14px 0 0; padding-left: 1.2em; display: grid; gap: 10px; }
+
+@media (max-width: 760px) {
+  .index { grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 8px; }
+  .index a { grid-template-columns: 1fr; justify-items: start; gap: 8px; padding: 14px 0; border-bottom: 0; }
+  .index .idx-line, .index br { display: none; }
+  .intro { padding-block: 32px 20px; }
+  .intro .lede { font-size: 1rem; }
+  .enc-rows div { grid-template-columns: minmax(0, 1fr); gap: 2px; }
+  .lv-grid div { grid-template-columns: 40px minmax(0, 1fr); grid-template-areas: "r n" "r s"; }
+  .enc-stage { grid-template-columns: minmax(0, 1fr); }
+  .enc-axis { height: 2px; background: repeating-linear-gradient(to right, var(--e-line) 0 6px, transparent 6px 12px); }
+  .ts-stage { grid-template-columns: minmax(0, 1fr); gap: 18px; }
+  .lv-stage { grid-template-columns: minmax(0, 1fr); }
+  .context { grid-template-columns: minmax(0, 1fr); }
+  .spec-block + .spec-block { border-left: 0 !important; }
+  .lv { --spine-x: 0px; }
+  .lv::before { width: 30px; background: linear-gradient(90deg, var(--l-black) 0 10px, var(--l-white) 10px 20px, var(--l-black) 20px 30px); }
+  .lv .wrap { padding-left: 46px; }
+  .lv-app-body > * { margin-left: 36px; }
+}
+@media (prefers-reduced-motion: reduce) {
+  * { transition-duration: 0.01ms !important; animation-duration: 0.01ms !important; }
+}
+</style>
+
+<header class="intro gut">
+  <div class="wrap">
+    <h1>Same file. New wrapper.</h1>
+    <p class="lede">Three identities for a desktop converter that swaps a file into its neighbouring format (mp4 to mov, mkv to mp4) <strong>without the file leaving the Mac</strong>, and <strong>without re-encoding</strong> when the codecs already fit.</p>
+    <nav class="index" aria-label="Directions">
+      <a href="#enclose">
+        <span class="icon" data-icon="enclose"></span>
+        <span><span class="idx-name">Enclose</span><br><span class="idx-line">A security envelope. Same letter, new envelope.</span></span>
+      </a>
+      <a href="#transship">
+        <span class="icon" data-icon="transship"></span>
+        <span><span class="idx-name">Transship</span><br><span class="idx-line">A shipping container. Cargo untouched, seal intact.</span></span>
+      </a>
+      <a href="#livery">
+        <span class="icon" data-icon="livery"></span>
+        <span><span class="idx-name">Livery</span><br><span class="idx-line">A race livery. Same chassis, new colours.</span></span>
+      </a>
+    </nav>
+    <p class="meta-line">Run each swap below. File names and codecs in the demos are examples.</p>
+  </div>
+</header>
+
+<!-- ================= ENCLOSE ================= -->
+<section class="board enc" id="enclose" data-world="enclose" aria-labelledby="enc-title">
+  <div class="enc-hero board-hero gut">
+    <div class="wrap">
+      <div class="enc-head">
+        <h2 class="enc-word" id="enc-title">enclose<span class="win" aria-hidden="true"></span></h2>
+        <p class="enc-tag">Same letter. New envelope.</p>
+      </div>
+      <div class="enc-stage stage" data-stage>
+        <div class="enc-env enc-env--from" data-from>
+          <div class="enc-ret"><b>From</b>this Mac</div>
+          <div class="enc-window empty" data-window><div class="fn" data-fn></div><div class="mt" data-mt></div></div>
+          <div class="enc-fmt" data-fmt>.mp4</div>
+        </div>
+        <div class="enc-axis" aria-hidden="true"></div>
+        <div class="enc-env enc-env--to" data-to>
+          <div class="enc-ret"><b>To</b>this Mac</div>
+          <div class="enc-indicia">No upload necessary<small>sealed on this Mac</small></div>
+          <div class="enc-window" data-window><div class="fn" data-fn>interview_take3.mov</div><div class="mt" data-mt>H.264 · AAC · 1080p</div></div>
+          <div class="enc-fmt" data-fmt>.mov</div>
+        </div>
+        <div class="enc-letter" data-flyer aria-hidden="true"><div class="frames"></div><div class="lf" data-lf></div><div data-lm></div></div>
+      </div>
+      <div class="enc-controls controls">
+        <button class="run" type="button" data-run>Re-enclose</button>
+        <div class="chips" role="group" aria-label="Example file"></div>
+        <p class="status" aria-live="polite" data-status>Re-enclosed. Same letter, new envelope. Nothing re-encoded.</p>
+      </div>
+    </div>
+  </div>
+
+  <div class="enc-sheet spec gut">
+    <div class="wrap">
+      <div class="spec-grid">
+        <div class="spec-block">
+          <h3>Mark</h3>
+          <div class="icons-row">
+            <span class="icon i128" data-icon="enclose"></span>
+            <span class="icon i64" data-icon="enclose"></span>
+            <span class="icon i32" data-icon="enclose"></span>
+            <svg class="glyph16" viewBox="0 0 20 20" aria-label="Menu bar glyph"><rect x="1.5" y="4.5" width="17" height="11" rx="1" fill="none" stroke="currentColor" stroke-width="1.5"/><rect x="4" y="9.5" width="8" height="3" rx=".6" fill="currentColor"/></svg>
+          </div>
+          <p class="mark-note">A window envelope. The window shows the file; the print around it is the format. The wordmark ends in the same window.</p>
+        </div>
+        <div class="spec-block">
+          <h3>Colour</h3>
+          <div class="swatches">
+            <div class="sw"><i style="background:#1b2775"></i><span>Security ink</span><code>#1B2775</code></div>
+            <div class="sw"><i style="background:#2b3c9e"></i><span>Tint line</span><code>#2B3C9E</code></div>
+            <div class="sw"><i style="background:#fbfcff;box-shadow:inset 0 0 0 1px #c9d1ee"></i><span>Envelope stock</span><code>#FBFCFF</code></div>
+            <div class="sw"><i style="background:#d6e0f2"></i><span>Glassine</span><code>#D6E0F2</code></div>
+            <div class="sw"><i style="background:#d1281e"></i><span>Privacy red</span><code>#D1281E</code></div>
+          </div>
+        </div>
+        <div class="spec-block">
+          <h3>Type</h3>
+          <div class="typeset">
+            <div><div class="ts-name">Schibsted Grotesk 800 · names, formats</div><div style="font:800 2rem/1 var(--e-display);letter-spacing:-.03em">.mov .aiff</div></div>
+            <div><div class="ts-name">Courier Prime · what's typed on the label</div><div style="font:400 1.05rem/1.3 var(--e-type)">interview_take3.mov<br>H.264 · AAC · 1080p</div></div>
+          </div>
+        </div>
+        <div class="spec-block">
+          <h3>Voice</h3>
+          <dl class="voice">
+            <div><dt>Empty window</dt><dd>Drop a file. It comes back in the next format, sealed on this Mac.</dd></div>
+            <div><dt>Done</dt><dd>Re-enclosed. Same letter, new envelope.</dd></div>
+            <div><dt>Needs a re-encode</dt><dd>This one can't just change envelopes. Its video gets rewritten for .mov: slower, still on this Mac.</dd></div>
+            <div><dt>Privacy</dt><dd>Nothing is posted. Ever.</dd></div>
+          </dl>
+        </div>
+      </div>
+
+      <div class="context">
+        <div>
+          <h3>In the app</h3>
+          <div class="mac enc-app">
+            <div class="mac-bar"><b></b><b></b><b></b><span>Enclose</span></div>
+            <div class="enc-app-body">
+              <div class="enc-drop">
+                <svg viewBox="0 0 64 40" aria-hidden="true"><rect x="1" y="1" width="62" height="38" rx="2" fill="#fbfcff" stroke="#1b2775" stroke-width="2"/><rect x="6" y="20" width="32" height="13" rx="2" fill="#d6e0f2" stroke="#1b2775" stroke-width="1.2"/><rect x="44" y="6" width="14" height="9" fill="none" stroke="#1b2775" stroke-width="1.2"/></svg>
+                <div><b>Drop a file to re-enclose</b><span>Or right-click any file in Finder.</span></div>
+              </div>
+              <div class="enc-rows">
+                <div><span>interview_take3.mp4 → .mov</span><em>Re-enclosed</em></div>
+                <div><span>drone_pass_02.mkv → .mp4</span><em>Re-enclosed</em></div>
+                <div class="warn"><span>screen_demo.webm → .mov</span><em>Rewritten · 4 min</em></div>
+              </div>
+              <div class="enc-foot">Private &amp; local · nothing leaves this Mac</div>
+            </div>
+          </div>
+        </div>
+        <div>
+          <h3>In Finder</h3>
+          <div class="menu" role="img" aria-label="Finder context menu with an Enclose as .mov action">
+            <div>Open</div><div>Get Info</div><div>Rename</div><hr>
+            <div class="sub">Quick Actions <svg viewBox="0 0 8 10"><path d="M1 1l5 4-5 4" fill="none" stroke="currentColor" stroke-width="1.5"/></svg></div>
+            <div class="hot"><span class="icon" data-icon="enclose"></span>Enclose as .mov</div>
+          </div>
+          <p class="menu-cap">The action names the result. No dialog opens; the new file appears next to the old one.</p>
+        </div>
+      </div>
+
+      <div class="notes">
+        <div>
+          <h3>Why it fits</h3>
+          <p>A window envelope separates what's inside from what's outside, which is exactly what a remux does. Security tint is the pattern printed so no one can read the letter: privacy drawn as a texture, not stated in a badge.</p>
+        </div>
+        <div>
+          <h3>Risk</h3>
+          <p>Envelopes mean email to most people. The mark has to stay a window envelope, never a flap, or it reads as a mail app.</p>
+          <h3 style="margin-top:20px">Other names</h3>
+          <p>Sleeve · Readdress · Encl.</p>
+        </div>
+        <div class="raises">
+          <h3>Rules it lives by</h3>
+          <ul>
+            <li><b>One axis.</b> Old and new mirror across the fold, nothing else on the line.</li>
+            <li><b>One bright thing.</b> Only the result window is lit; the old envelope dims.</li>
+            <li><b>State by form.</b> An empty window shows tint; a full one shows the file. No status colours needed.</li>
+            <li><b>One file in hand.</b> Specs set in Courier, figures aligned.</li>
+          </ul>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ================= TRANSSHIP ================= -->
+<section class="board ts" id="transship" data-world="transship" aria-labelledby="ts-title">
+  <div class="ts-wall board-hero gut">
+    <div class="wrap">
+      <h2 class="ts-word" id="ts-title">Transship</h2>
+      <div class="ts-codes" aria-label="Container code TRNU 240117, check digit, size type 22G1">
+        <span>TRNU 240117<span class="chk" data-check>3</span></span>
+        <span>22G1</span>
+        <small>Cargo untouched</small>
+      </div>
+      <p class="ts-tag">Moves your file into a new container without opening the cargo.</p>
+    </div>
+  </div>
+  <div class="ts-quay gut">
+    <div class="ts-beam" aria-hidden="true"></div>
+    <div class="wrap">
+      <div class="ts-stage stage" data-stage>
+        <div class="ts-box ts-box--from" data-from>
+          <div class="ts-fmt" data-fmt>MP4</div>
+          <div class="ts-code">TRNU 240117</div>
+          <div class="ts-bay" data-bay></div>
+        </div>
+        <div class="ts-box ts-box--to" data-to>
+          <div class="ts-fmt" data-fmt>MOV</div>
+          <div class="ts-code">TRNU 240118</div>
+          <div class="ts-bay" data-bay>
+            <div class="ts-cargo" data-flyer>
+              <div class="ts-crate">Video<b>H.264</b></div>
+              <div class="ts-crate">Audio<b>AAC</b></div>
+              <div class="ts-crate">Frame<b>1080p</b></div>
+            </div>
+          </div>
+        </div>
+      </div>
+      <div class="controls">
+        <button class="run" type="button" data-run>Transship</button>
+        <div class="chips" role="group" aria-label="Example file"></div>
+        <span class="ts-seal" data-seal><i></i><span data-seal-text>Seal 0042117 · intact</span></span>
+        <p class="status" aria-live="polite" data-status>Transshipped. Cargo untouched, seal intact.</p>
+      </div>
+    </div>
+  </div>
+
+  <div class="ts-sheet spec gut">
+    <div class="wrap">
+      <div class="spec-grid">
+        <div class="spec-block">
+          <h3>Mark</h3>
+          <div class="icons-row">
+            <span class="icon i128" data-icon="transship"></span>
+            <span class="icon i64" data-icon="transship"></span>
+            <span class="icon i32" data-icon="transship"></span>
+            <svg class="glyph16" viewBox="0 0 20 20" aria-label="Menu bar glyph"><rect x="2" y="3" width="16" height="14" fill="none" stroke="currentColor" stroke-width="1.5"/><path d="M7 3v14M13 3v14" stroke="currentColor" stroke-width="1.5"/><rect x="8.5" y="8.5" width="3" height="3" fill="currentColor"/></svg>
+          </div>
+          <p class="mark-note">The container door: locking bars and a yellow seal. The seal is the promise. It stays on through the transfer.</p>
+        </div>
+        <div class="spec-block">
+          <h3>Colour</h3>
+          <div class="swatches">
+            <div class="sw"><i style="background:#9b3a24"></i><span>Oxide</span><code>#9B3A24</code></div>
+            <div class="sw"><i style="background:#2d5672"></i><span>Slate</span><code>#2D5672</code></div>
+            <div class="sw"><i style="background:#23282c"></i><span>Hull</span><code>#23282C</code></div>
+            <div class="sw"><i style="background:#f1bf2c"></i><span>Seal yellow</span><code>#F1BF2C</code></div>
+            <div class="sw"><i style="background:#eef1f0;box-shadow:inset 0 0 0 1px #8a9095"></i><span>Stencil</span><code>#EEF1F0</code></div>
+          </div>
+        </div>
+        <div class="spec-block">
+          <h3>Type</h3>
+          <div class="typeset">
+            <div><div class="ts-name">Big Shoulders Stencil 900 · formats, codes</div><div style="font:900 2.3rem/1 var(--t-display);letter-spacing:.03em">MOV · TRNU</div></div>
+            <div><div class="ts-name">Barlow Condensed · manifest</div><div style="font:600 1.05rem/1.3 var(--t-label);letter-spacing:.06em;text-transform:uppercase">Seal 0042117 · intact</div></div>
+            <div><div class="ts-name">Barlow · sentences</div><div style="font:400 1rem/1.4 var(--t-text)">Cargo won't fit as packed.</div></div>
+          </div>
+        </div>
+        <div class="spec-block">
+          <h3>Voice</h3>
+          <dl class="voice">
+            <div><dt>Empty dock</dt><dd>Drop it on the dock.</dd></div>
+            <div><dt>Done</dt><dd>Transshipped. Cargo untouched, seal intact.</dd></div>
+            <div><dt>Needs a re-encode</dt><dd>This cargo won't fit a MOV as packed. Repacking: slower, still in port.</dd></div>
+            <div><dt>Privacy</dt><dd>Nothing leaves port.</dd></div>
+          </dl>
+        </div>
+      </div>
+
+      <div class="context">
+        <div>
+          <h3>In the app</h3>
+          <div class="mac ts-app">
+            <div class="mac-bar"><b></b><b></b><b></b><span>Transship</span></div>
+            <div class="ts-app-body">
+              <div class="ts-dock">
+                <svg viewBox="0 0 70 34" aria-hidden="true"><rect x="1" y="1" width="68" height="32" fill="#2d5672" stroke="#121517" stroke-width="2"/><path d="M12 1v32M20 1v32M28 1v32M36 1v32M44 1v32M52 1v32M60 1v32" stroke="#22445b" stroke-width="2"/><rect x="5" y="5" width="22" height="10" fill="#eef1f0"/></svg>
+                <div><b>Drop it on the dock</b><span>Or right-click any file in Finder</span></div>
+              </div>
+              <div class="ts-manifest">
+                <table>
+                  <thead><tr><th>Cargo</th><th>Route</th><th>Seal</th></tr></thead>
+                  <tbody>
+                    <tr><td>interview_take3</td><td>MP4 → MOV</td><td class="ok">Intact</td></tr>
+                    <tr><td>drone_pass_02</td><td>MKV → MP4</td><td class="ok">Intact</td></tr>
+                    <tr><td>screen_demo</td><td>WEBM → MOV</td><td class="rp">Repacked</td></tr>
+                  </tbody>
+                </table>
+              </div>
+            </div>
+          </div>
+        </div>
+        <div>
+          <h3>In Finder</h3>
+          <div class="menu" role="img" aria-label="Finder context menu with a Transship to .mov action">
+            <div>Open</div><div>Get Info</div><div>Rename</div><hr>
+            <div class="sub">Quick Actions <svg viewBox="0 0 8 10"><path d="M1 1l5 4-5 4" fill="none" stroke="currentColor" stroke-width="1.5"/></svg></div>
+            <div class="hot"><span class="icon" data-icon="transship"></span>Transship to .mov</div>
+          </div>
+          <p class="menu-cap">Every conversion gets a manifest line. "Intact" means not one frame was re-encoded.</p>
+        </div>
+      </div>
+
+      <div class="notes">
+        <div>
+          <h3>Why it fits</h3>
+          <p>mp4 and mov are literally called containers. Transshipment is moving cargo from one vessel to another at the port without unpacking it. The seal gives lossless a visible, checkable symbol.</p>
+        </div>
+        <div>
+          <h3>Risk</h3>
+          <p>Containers are the most familiar metaphor in software. Docker owns the whale and the box. This is also the coldest of the three for everyday users. It wins with editors who know what a container is.</p>
+        </div>
+        <div>
+          <h3>Other names</h3>
+          <p>Twistlock · Quayside · TEU</p>
+          <p style="margin-top:10px">The code on the wall is a real ISO 6346 code. Its boxed check digit is computed on this page.</p>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ================= LIVERY ================= -->
+<section class="board lv" id="livery" data-world="livery" aria-labelledby="lv-title">
+  <div class="board-hero gut">
+    <div class="wrap">
+      <h2 class="lv-word" id="lv-title">Livery</h2>
+      <p class="lv-tag">Same chassis. New colours.</p>
+      <div class="lv-stage stage" data-stage>
+        <svg class="lv-car" viewBox="0 96 1000 300" role="img" aria-label="Endurance prototype in its file-format livery" data-panel>
+          <defs>
+            <clipPath id="lvBody"><path d="M30 318 L30 222 C120 206 230 200 330 196 C390 194 420 176 452 150 C500 112 600 106 660 140 C690 158 720 176 780 184 C860 194 930 222 968 262 C984 280 990 300 978 318 L874 318 A76 76 0 0 0 722 318 L290 318 A76 76 0 0 0 138 318 Z"/></clipPath>
+            <clipPath id="lvWipe"><rect data-wipe x="0" y="0" width="1000" height="400"/></clipPath>
+          </defs>
+          <g class="lv-wing" fill="#111"><rect x="6" y="148" width="150" height="22" rx="3"/><rect x="62" y="168" width="14" height="44"/><rect x="104" y="168" width="14" height="44"/></g>
+          <g clip-path="url(#lvBody)" data-coat-old></g>
+          <g clip-path="url(#lvBody)"><g clip-path="url(#lvWipe)" data-coat-new></g></g>
+          <path d="M462 160 C506 124 590 118 640 148 L668 168 L470 172 Z" fill="#0d1a2b" opacity=".88"/>
+          <path d="M486 154 C520 132 570 128 604 140" stroke="#fff" stroke-opacity=".35" stroke-width="4" fill="none" stroke-linecap="round"/>
+          <g class="lv-wheel"><circle cx="214" cy="322" r="64" fill="#111"/><circle cx="214" cy="322" r="40" fill="#2a2a2a"/><circle cx="214" cy="322" r="12" fill="#ffd400"/></g>
+          <g class="lv-wheel"><circle cx="798" cy="322" r="64" fill="#111"/><circle cx="798" cy="322" r="40" fill="#2a2a2a"/><circle cx="798" cy="322" r="12" fill="#ffd400"/></g>
+          <rect x="0" y="386" width="1000" height="6" fill="#111" opacity=".18"/>
+        </svg>
+        <div class="lv-pit">
+          <div data-pit1>MOV</div>
+          <div class="y" data-pit2>Resprayed</div>
+          <div data-pit3>0 frames touched</div>
+          <p class="lv-decal-line">Local only · Lossless · No upload</p>
+        </div>
+      </div>
+      <div class="controls">
+        <button class="run" type="button" data-run>Respray</button>
+        <div class="chips" role="group" aria-label="Example file"></div>
+        <p class="status" aria-live="polite" data-status>Resprayed. Not a frame touched.</p>
+      </div>
+    </div>
+  </div>
+
+  <div class="lv-sheet spec gut">
+    <div class="wrap">
+      <div class="spec-grid">
+        <div class="spec-block">
+          <h3>Mark</h3>
+          <div class="icons-row">
+            <span class="icon i128" data-icon="livery"></span>
+            <span class="icon i64" data-icon="livery"></span>
+            <span class="icon i32" data-icon="livery"></span>
+            <svg class="glyph16" viewBox="0 0 20 20" aria-label="Menu bar glyph"><path d="M7 1v18M13 1v18" stroke="currentColor" stroke-width="2.4"/><circle cx="10" cy="10" r="5" fill="currentColor"/></svg>
+          </div>
+          <p class="mark-note">The stripe and the roundel. In Finder, the roundel carries the file's format, so every format wears its own livery.</p>
+        </div>
+        <div class="spec-block">
+          <h3>Colour</h3>
+          <div class="swatches">
+            <div class="sw"><i style="background:#ffd400"></i><span>House lemon</span><code>#FFD400</code></div>
+            <div class="sw"><i style="background:#111;box-shadow:inset 0 0 0 1px #555"></i><span>Race black</span><code>#111111</code></div>
+            <div class="sw"><i style="background:#fff"></i><span>Roundel white</span><code>#FFFFFF</code></div>
+          </div>
+          <div class="lv-liveries" aria-label="Format liveries">
+            <div style="background:#2340c8;--s1:#fff;--s2:#2340c8"><b>mp4</b></div>
+            <div style="background:#111;--s1:#ffd400;--s2:#111;box-shadow:inset 0 0 0 1px #555"><b>mov</b></div>
+            <div style="background:#0b7a4b;--s1:#fff;--s2:#0b7a4b"><b>mkv</b></div>
+            <div style="background:#e8432a;--s1:#111;--s2:#fff"><b>wav</b></div>
+            <div style="background:#fff;--s1:#111;--s2:#fff"><b>aiff</b></div>
+            <div style="background:#6a3fd0;--s1:#ffd400;--s2:#6a3fd0"><b>webm</b></div>
+          </div>
+        </div>
+        <div class="spec-block">
+          <h3>Type</h3>
+          <div class="typeset">
+            <div><div class="ts-name">Archivo Expanded Black · numbers, names</div><div style="font:900 2.2rem/1 var(--l-face);font-variation-settings:'wdth' 125;letter-spacing:-.02em">MOV 04</div></div>
+            <div><div class="ts-name">Archivo · everything else</div><div style="font:600 1rem/1.4 var(--l-face)">Needs an engine swap, not a respray.</div></div>
+          </div>
+        </div>
+        <div class="spec-block">
+          <h3>Voice</h3>
+          <dl class="voice">
+            <div><dt>Empty garage</dt><dd>Roll it in.</dd></div>
+            <div><dt>Done</dt><dd>Resprayed. Not a frame touched.</dd></div>
+            <div><dt>Needs a re-encode</dt><dd>This one needs an engine swap, not a respray. Slower, still in the garage.</dd></div>
+            <div><dt>Privacy</dt><dd>It never leaves the garage.</dd></div>
+          </dl>
+        </div>
+      </div>
+
+      <div class="context">
+        <div>
+          <h3>In the app</h3>
+          <div class="mac lv-app">
+            <div class="mac-bar"><b></b><b></b><b></b><span>Livery</span></div>
+            <div class="lv-app-body">
+              <div class="lv-drop"><b>Roll it in</b><span>Drop a file, or right-click it in Finder.</span></div>
+              <div class="lv-grid">
+                <div><i>mov</i><span>interview_take3</span><em>Resprayed</em></div>
+                <div><i>mp4</i><span>drone_pass_02</span><em>Resprayed</em></div>
+                <div><i>mov</i><span>screen_demo</span><em>Engine swap</em></div>
+              </div>
+            </div>
+          </div>
+        </div>
+        <div>
+          <h3>In Finder</h3>
+          <div class="menu" role="img" aria-label="Finder context menu with a Respray as .mov action">
+            <div>Open</div><div>Get Info</div><div>Rename</div><hr>
+            <div class="sub">Quick Actions <svg viewBox="0 0 8 10"><path d="M1 1l5 4-5 4" fill="none" stroke="currentColor" stroke-width="1.5"/></svg></div>
+            <div class="hot"><span class="icon" data-icon="livery"></span>Respray as .mov</div>
+          </div>
+          <p class="menu-cap">The verb carries the brand: you respray a file. The stripe direction is the only motion the brand uses.</p>
+        </div>
+      </div>
+
+      <div class="notes">
+        <div>
+          <h3>Why it fits</h3>
+          <p>A livery is a new skin over an unchanged machine, and racing liveries are identity systems built to work at speed. Giving every format its own livery turns the file browser into a visible system.</p>
+        </div>
+        <div>
+          <h3>Risk</h3>
+          <p>The loudest of the three. Motorsport energy can feel like a speed promise, and re-encodes are not fast. Copy has to keep "engine swap" honest. The colourways stay original: no borrowed sponsor liveries.</p>
+        </div>
+        <div>
+          <h3>Other names</h3>
+          <p>Respray · Pitwall · Wrap</p>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<footer class="closing gut">
+  <div class="wrap">
+    <h2>Before you choose</h2>
+    <div class="closing-grid">
+      <div>
+        <ol>
+          <li><strong>Check the names.</strong> None of these has been searched for trademarks, App Store conflicts, or domains.</li>
+          <li><strong>Pick a wrapper, not a palette.</strong> The colours can move. The metaphor sets the voice, the verb in Finder, and the icon.</li>
+          <li><strong>Next step after a pick:</strong> a full design system, production app icons at every macOS size, and the first app screens.</li>
+        </ol>
+      </div>
+      <div>
+        <p>Also explored, then folded into Enclose as rules:</p>
+        <ul class="folded">
+          <li><strong>Formal garden plans.</strong> Too ornamental. Kept the single axis that old and new mirror across.</li>
+          <li><strong>Bioluminescent forest.</strong> Off-subject. Kept one brightness reserved for the result.</li>
+          <li><strong>Console menu in a void.</strong> Too game-like. Kept objects on a ground with no panels around them.</li>
+          <li><strong>Studio patch bay.</strong> A tool costume. Kept state drawn by form instead of colour.</li>
+          <li><strong>Particle event display.</strong> Too dense. Kept one file in hand and aligned figures.</li>
+        </ul>
+      </div>
+    </div>
+  </div>
+</footer>
+
+<script>
+(function () {
+  "use strict";
+  var reduce = window.matchMedia && window.matchMedia("(prefers-reduced-motion: reduce)").matches;
+
+  /* ---------- App icons (authored SVG) ---------- */
+  var ICONS = {
+    enclose:
+      '<svg viewBox="0 0 100 100" role="img" aria-label="Enclose app icon"><defs><pattern id="tintI" width="10" height="5" patternUnits="userSpaceOnUse"><path d="M0 2.5 Q2.5 0 5 2.5 T10 2.5" fill="none" stroke="#2b3c9e" stroke-width="1"/></pattern></defs>' +
+      '<rect width="100" height="100" fill="#1b2775"/><rect width="100" height="100" fill="url(#tintI)"/>' +
+      '<rect x="14" y="27" width="72" height="46" rx="2" fill="#fbfcff"/>' +
+      '<rect x="20" y="49" width="38" height="17" rx="2.5" fill="#d6e0f2"/>' +
+      '<rect x="24" y="54" width="22" height="3" rx="1" fill="#1b2775"/><rect x="24" y="59.5" width="14" height="2.4" rx="1" fill="#1b2775" opacity=".55"/>' +
+      '<rect x="66" y="32" width="15" height="10" fill="none" stroke="#1b2775" stroke-width="1.6"/>' +
+      '<rect x="20" y="36" width="20" height="2.6" fill="#d1281e"/></svg>',
+    transship:
+      '<svg viewBox="0 0 100 100" role="img" aria-label="Transship app icon"><rect width="100" height="100" fill="#9b3a24"/>' +
+      '<g fill="#7c2c1a">' + [0,1,2,3,4,5,6,7,8,9].map(function (i) { return '<rect x="' + (i * 10 + 6) + '" y="0" width="2.5" height="100"/>'; }).join("") + '</g>' +
+      '<rect x="0" y="0" width="100" height="9" fill="#121517"/><rect x="0" y="91" width="100" height="9" fill="#121517"/>' +
+      '<g stroke="#eef1f0" stroke-width="3.4" stroke-linecap="round"><path d="M27 15v70M42 15v70M58 15v70M73 15v70"/></g>' +
+      '<g fill="#eef1f0"><rect x="22" y="47" width="10" height="5" rx="1"/><rect x="37" y="47" width="10" height="5" rx="1"/><rect x="53" y="47" width="10" height="5" rx="1"/><rect x="68" y="47" width="10" height="5" rx="1"/></g>' +
+      '<path d="M50 52 l0 14" stroke="#f1bf2c" stroke-width="2"/><rect x="45" y="64" width="10" height="13" rx="2" fill="#f1bf2c"/></svg>',
+    livery:
+      '<svg viewBox="0 0 100 100" role="img" aria-label="Livery app icon"><rect width="100" height="100" fill="#ffd400"/>' +
+      '<rect x="34" y="0" width="11" height="100" fill="#111"/><rect x="45" y="0" width="10" height="100" fill="#fff"/><rect x="55" y="0" width="11" height="100" fill="#111"/>' +
+      '<circle cx="50" cy="50" r="22" fill="#fff" stroke="#111" stroke-width="5"/>' +
+      '<path d="M43 37h7v20h10v6H43z" fill="#111"/></svg>'
+  };
+  var n = 0;
+  document.querySelectorAll("[data-icon]").forEach(function (el) {
+    var svg = ICONS[el.getAttribute("data-icon")] || "";
+    n += 1;
+    el.innerHTML = svg.replace(/tintI/g, "tintI" + n);
+    if (el.closest(".index, .menu")) { var s = el.querySelector("svg"); if (s) { s.setAttribute("aria-hidden", "true"); s.removeAttribute("role"); s.removeAttribute("aria-label"); } }
+  });
+
+  /* ---------- ISO 6346 check digit ---------- */
+  function iso6346(code) {
+    var vals = {}, v = 10;
+    "ABCDEFGHIJKLMNOPQRSTUVWXYZ".split("").forEach(function (ch) { if (v % 11 === 0) v++; vals[ch] = v; v++; });
+    var sum = 0;
+    code.replace(/\s/g, "").slice(0, 10).split("").forEach(function (ch, i) { var x = /\d/.test(ch) ? +ch : vals[ch]; sum += x * Math.pow(2, i); });
+    return (sum % 11) % 10;
+  }
+  var chk = document.querySelector("[data-check]");
+  if (chk) chk.textContent = iso6346("TRNU240117");
+
+  /* ---------- Example files ---------- */
+  var PAIRS = [
+    { from: "mp4", to: "mov", name: "interview_take3", a: "H.264", b: "AAC", c: "1080p", remux: true },
+    { from: "mkv", to: "mp4", name: "drone_pass_02", a: "H.264", b: "AAC", c: "4K", remux: true },
+    { from: "wav", to: "aiff", name: "room_tone_A", a: "PCM", b: "24-bit", c: "48 kHz", remux: true },
+    { from: "webm", to: "mov", name: "screen_demo", a: "VP9", b: "Opus", c: "1440p", remux: false, a2: "H.264", b2: "AAC" }
+  ];
+  var LIVERY = {
+    mp4: { body: "#2340c8", s1: "#fff", s2: "#2340c8" },
+    mov: { body: "#111", s1: "#ffd400", s2: "#111" },
+    mkv: { body: "#0b7a4b", s1: "#fff", s2: "#0b7a4b" },
+    wav: { body: "#e8432a", s1: "#111", s2: "#fff" },
+    aiff: { body: "#fff", s1: "#111", s2: "#fff" },
+    webm: { body: "#6a3fd0", s1: "#ffd400", s2: "#6a3fd0" }
+  };
+
+  function relRect(el, stage) {
+    var r = el.getBoundingClientRect(), s = stage.getBoundingClientRect();
+    return { x: r.left - s.left, y: r.top - s.top, w: r.width, h: r.height };
+  }
+  function flight(el, from, to, lift, dur, sizeW) {
+    var ez = "cubic-bezier(.3,0,.2,1)";
+    var kf = [
+      { transform: "translate(" + from.x + "px," + from.y + "px)", opacity: 0, offset: 0, easing: ez },
+      { transform: "translate(" + from.x + "px," + (from.y - lift) + "px)", opacity: 1, offset: 0.3, easing: ez },
+      { transform: "translate(" + to.x + "px," + (to.y - lift) + "px)", opacity: 1, offset: 0.68, easing: ez },
+      { transform: "translate(" + to.x + "px," + (to.y - lift * 0.2) + "px)", opacity: 1, offset: 0.9 },
+      { transform: "translate(" + to.x + "px," + to.y + "px)", opacity: 0, offset: 1 }
+    ];
+    if (sizeW) el.style.width = sizeW + "px";
+    return el.animate(kf, { duration: dur, easing: "linear", fill: "forwards" }).finished;
+  }
+  var wait = function (ms) { return new Promise(function (r) { setTimeout(r, ms); }); };
+
+  /* ---------- World behaviours ---------- */
+  var WORLDS = {
+    enclose: {
+      status: function (p) { return p.remux ? "Re-enclosed. Same letter, new envelope. Nothing re-encoded." : "This one can't just change envelopes. Its video gets rewritten for ." + p.to + ": slower, still on this Mac."; },
+      setRest: function (root, p) {
+        var f = root.querySelector("[data-from]"), t = root.querySelector("[data-to]");
+        f.querySelector("[data-fmt]").textContent = "." + p.from;
+        t.querySelector("[data-fmt]").textContent = "." + p.to;
+        f.querySelector("[data-window]").classList.add("empty");
+        var w = t.querySelector("[data-window]");
+        w.classList.remove("empty");
+        w.querySelector("[data-fn]").textContent = p.name + "." + p.to;
+        w.querySelector("[data-mt]").textContent = (p.remux ? [p.a, p.b, p.c] : [p.a2, p.b2, p.c]).join(" · ");
+      },
+      run: function (root, p) {
+        var stage = root.querySelector("[data-stage]"), f = root.querySelector("[data-from]"), t = root.querySelector("[data-to]");
+        var fw = f.querySelector("[data-window]"), tw = t.querySelector("[data-window]");
+        f.querySelector("[data-fmt]").textContent = "." + p.from;
+        t.querySelector("[data-fmt]").textContent = "." + p.to;
+        fw.classList.remove("empty");
+        fw.querySelector("[data-fn]").textContent = p.name + "." + p.from;
+        fw.querySelector("[data-mt]").textContent = [p.a, p.b, p.c].join(" · ");
+        tw.classList.add("empty");
+        var letter = stage.querySelector("[data-flyer]");
+        letter.querySelector("[data-lf]").textContent = p.name;
+        letter.querySelector("[data-lm]").textContent = [p.a, p.b, p.c].join(" · ");
+        var fr = relRect(f, stage), tr = relRect(t, stage);
+        var w = Math.min(150, fr.w * 0.34);
+        var from = { x: fr.x + fr.w / 2 - w / 2, y: fr.y + fr.h * 0.1 };
+        var to = { x: tr.x + tr.w / 2 - w / 2, y: tr.y + tr.h * 0.1 };
+        return wait(260).then(function () {
+          fw.classList.add("empty");
+          return flight(letter, from, to, fr.h * 0.75, 1700, w);
+        }).then(function () {
+          WORLDS.enclose.setRest(root, p);
+        });
+      }
+    },
+    transship: {
+      status: function (p) { return p.remux ? "Transshipped. Cargo untouched, seal intact." : "This cargo won't fit a " + p.to.toUpperCase() + " as packed. Repacked: slower, still in port."; },
+      cargo: function (p, repacked) {
+        var labels = repacked ? [["Video", p.a2], ["Audio", p.b2], ["Frame", p.c]] : [["Video", p.a], ["Audio", p.b], ["Frame", p.c]];
+        if (p.to === "aiff") labels = [["Audio", p.a], ["Depth", p.b], ["Rate", p.c]];
+        return labels.map(function (l, i) { return '<div class="ts-crate' + (repacked && i < 2 ? " repacked" : "") + '">' + l[0] + "<b>" + l[1] + "</b></div>"; }).join("");
+      },
+      fmt: function (box, v) { var el = box.querySelector("[data-fmt]"); el.textContent = v; el.classList.toggle("long", v.length > 3); },
+      seal: function (root, p) {
+        var s = root.querySelector("[data-seal]");
+        s.classList.toggle("broken", !p.remux);
+        root.querySelector("[data-seal-text]").textContent = p.remux ? "Seal 0042117 · intact" : "Seal 0042117 · reissued";
+      },
+      setRest: function (root, p) {
+        var f = root.querySelector("[data-from]"), t = root.querySelector("[data-to]");
+        WORLDS.transship.fmt(f, p.from); WORLDS.transship.fmt(t, p.to);
+        var cargo = root.querySelector("[data-flyer]");
+        cargo.classList.remove("flying"); cargo.style.width = ""; cargo.getAnimations().forEach(function (a) { a.cancel(); });
+        cargo.innerHTML = WORLDS.transship.cargo(p, !p.remux);
+        t.querySelector("[data-bay]").appendChild(cargo);
+        WORLDS.transship.seal(root, p);
+      },
+      run: function (root, p) {
+        var stage = root.querySelector("[data-stage]"), f = root.querySelector("[data-from]"), t = root.querySelector("[data-to]");
+        WORLDS.transship.fmt(f, p.from); WORLDS.transship.fmt(t, p.to);
+        var cargo = root.querySelector("[data-flyer]");
+        cargo.innerHTML = WORLDS.transship.cargo(p, false);
+        f.querySelector("[data-bay]").appendChild(cargo);
+        var fb = relRect(cargo, stage);
+        var tb = relRect(t.querySelector("[data-bay]"), stage);
+        var fbay = relRect(f.querySelector("[data-bay]"), stage);
+        var to = { x: tb.x + (fb.x - fbay.x), y: tb.y + (fb.y - fbay.y) };
+        var lift = fb.y - relRect(f, stage).y + fb.h + 28;
+        return wait(300).then(function () {
+          cargo.classList.add("flying"); cargo.style.left = "0"; cargo.style.top = "0"; cargo.style.width = fb.w + "px";
+          stage.appendChild(cargo);
+          var kf = [
+            { transform: "translate(" + fb.x + "px," + fb.y + "px)" },
+            { transform: "translate(" + fb.x + "px," + (fb.y - lift) + "px)", offset: 0.3 },
+            { transform: "translate(" + to.x + "px," + (to.y - lift) + "px)", offset: 0.72 },
+            { transform: "translate(" + to.x + "px," + to.y + "px)" }
+          ];
+          if (stage.getBoundingClientRect().width < 700) {
+            kf[1].transform = "translate(" + (fb.x + fb.w * 0.6) + "px," + fb.y + "px)";
+            kf[2].transform = "translate(" + (to.x + fb.w * 0.6) + "px," + to.y + "px)";
+          }
+          return cargo.animate(kf, { duration: 1900, easing: "cubic-bezier(.45,0,.2,1)", fill: "forwards" }).finished;
+        }).then(function () {
+          WORLDS.transship.setRest(root, p);
+        });
+      }
+    },
+    livery: {
+      status: function (p) { return p.remux ? "Resprayed. Not a frame touched." : "This one needs an engine swap, not a respray. Slower, still in the garage."; },
+      paint: function (coat, fmt) {
+        var l = LIVERY[fmt] || LIVERY.mov;
+        var fs = fmt.length > 3 ? 28 : 36, tl = fmt.length > 3 ? 88 : 80;
+        coat.innerHTML =
+          '<rect x="0" y="0" width="1000" height="400" fill="' + l.body + '"/>' +
+          '<rect x="0" y="232" width="1000" height="44" fill="' + l.s1 + '"/>' +
+          '<rect x="0" y="246" width="1000" height="16" fill="' + l.s2 + '"/>' +
+          '<rect x="452" y="140" width="1000" height="10" fill="' + l.s1 + '" opacity=".9"/>' +
+          '<circle cx="372" cy="254" r="56" fill="#fff" stroke="#111" stroke-width="7"/>' +
+          '<text x="372" y="' + (254 + fs * 0.36) + '" text-anchor="middle" font-size="' + fs + '" textLength="' + tl + '" lengthAdjust="spacingAndGlyphs" style="font-variation-settings:\'wdth\' 112" fill="#111">' + fmt + '</text>' +
+          '';
+      },
+      pit: function (root, p) {
+        root.querySelector("[data-pit1]").textContent = p.to.toUpperCase();
+        root.querySelector("[data-pit2]").textContent = p.remux ? "Resprayed" : "Engine swap";
+        root.querySelector("[data-pit3]").textContent = p.remux ? "0 frames touched" : "Still on this Mac";
+      },
+      setRest: function (root, p) {
+        WORLDS.livery.paint(root.querySelector("[data-coat-old]"), p.from);
+        WORLDS.livery.paint(root.querySelector("[data-coat-new]"), p.to);
+        root.querySelector("[data-wipe]").setAttribute("width", "1000");
+        WORLDS.livery.pit(root, p);
+      },
+      run: function (root, p) {
+        var oldC = root.querySelector("[data-coat-old]"), newC = root.querySelector("[data-coat-new]"), wipe = root.querySelector("[data-wipe]");
+        WORLDS.livery.paint(oldC, p.from);
+        WORLDS.livery.paint(newC, p.to);
+        wipe.setAttribute("width", "0");
+        root.querySelector("[data-pit1]").textContent = p.from.toUpperCase();
+        root.querySelector("[data-pit2]").textContent = "In the box";
+        root.querySelector("[data-pit3]").textContent = "Stand by";
+        var dur = p.remux ? 900 : 2200;
+        return wait(450).then(function () {
+          return new Promise(function (done) {
+            var t0 = null;
+            function step(ts) {
+              if (t0 === null) t0 = ts;
+              var k = Math.min(1, (ts - t0) / dur);
+              var e = k < 0.5 ? 4 * k * k * k : 1 - Math.pow(-2 * k + 2, 3) / 2;
+              wipe.setAttribute("width", String(1000 * e));
+              if (k < 1) requestAnimationFrame(step); else done();
+            }
+            requestAnimationFrame(step);
+          });
+        }).then(function () {
+          WORLDS.livery.pit(root, p);
+        });
+      }
+    }
+  };
+
+  document.querySelectorAll("[data-world]").forEach(function (root) {
+    var world = WORLDS[root.getAttribute("data-world")];
+    var chipsEl = root.querySelector(".chips");
+    var status = root.querySelector("[data-status]");
+    var runBtn = root.querySelector("[data-run]");
+    var current = 0, busy = false;
+
+    PAIRS.forEach(function (p, i) {
+      var b = document.createElement("button");
+      b.type = "button"; b.className = "chip"; b.textContent = p.from + " → " + p.to;
+      b.setAttribute("aria-pressed", i === 0 ? "true" : "false");
+      b.addEventListener("click", function () {
+        if (busy) return;
+        current = i;
+        chipsEl.querySelectorAll(".chip").forEach(function (c, j) { c.setAttribute("aria-pressed", j === i ? "true" : "false"); });
+        go();
+      });
+      chipsEl.appendChild(b);
+    });
+
+    function go() {
+      var p = PAIRS[current];
+      if (reduce || !Element.prototype.animate) { world.setRest(root, p); status.textContent = world.status(p); return; }
+      busy = true; runBtn.disabled = true; status.textContent = "Working on " + p.name + "." + p.from + "…";
+      world.run(root, p).then(function () {
+        status.textContent = world.status(p);
+      }).catch(function () {
+        world.setRest(root, p); status.textContent = world.status(p);
+      }).then(function () { busy = false; runBtn.disabled = false; });
+    }
+    runBtn.addEventListener("click", function () { if (!busy) go(); });
+    world.setRest(root, PAIRS[0]);
+  });
+})();
+</script>

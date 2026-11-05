@@ -1,0 +1,44 @@
+name: CI
+
+on:
+  push:
+  pull_request:
+
+jobs:
+  test:
+    strategy:
+      fail-fast: false
+      matrix:
+        os: [macos-latest, windows-latest]
+    runs-on: ${{ matrix.os }}
+    steps:
+      - uses: actions/checkout@v4
+      - uses: dtolnay/rust-toolchain@stable
+
+      - name: Install ffmpeg (macOS)
+        if: runner.os == 'macOS'
+        run: brew install ffmpeg
+      - name: Install ffmpeg (Windows)
+        if: runner.os == 'Windows'
+        run: choco install ffmpeg-full -y --no-progress
+
+      - name: Build
+        run: cargo build --release
+      - name: Test
+        run: cargo test
+
+      - name: Bundle (macOS, self-contained)
+        if: runner.os == 'macOS'
+        run: |
+          scripts/bundle-macos.sh --with-ffmpeg
+          ditto -c -k --keepParent dist/Retype.app dist/Retype-macos.zip
+      - uses: actions/upload-artifact@v4
+        if: runner.os == 'macOS'
+        with:
+          name: Retype-macos
+          path: dist/Retype-macos.zip
+      - uses: actions/upload-artifact@v4
+        if: runner.os == 'Windows'
+        with:
+          name: Retype-windows
+          path: target/release/retype.exe

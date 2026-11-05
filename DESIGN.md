@@ -134,10 +134,27 @@ A near-monochrome palette of cool white and blue-black ink, with a single warm y
 - **Hover Wash** (`hover-wash`): background of a format chip under the pointer.
 - **Paper** (`paper`): the window and page background; button text on ink.
 
+### Dark
+The app follows the system appearance. The yellow and the ink on it do not change; everything else does.
+
+| Token | Light | Dark |
+|---|---|---|
+| paper | #ffffff | #17191d |
+| ink (text, primary button fill) | #111418 | #eceef1 |
+| ink-hover | #2a2f36 | #d2d6dc |
+| soft | #6a7079 (4.9:1) | #969da7 (6.3:1) |
+| neighbour | #8a9098 | #6c737d |
+| line | #e4e6ea | #2e3239 |
+| hover-wash | #f1f2f4 | #25282e |
+| selection-yellow | #ffe14a | #ffe14a |
+| on-yellow | #111418 | #111418 |
+
+The primary button inverts with the theme: ink fill and paper text, so it is near-white with dark text in dark mode.
+
 ### Named Rules
 **The Selection Rule.** Yellow appears only behind text that is selected, chosen, or just produced. If nothing on screen is selected, no yellow shows except the mark.
 
-**The Fill-Not-Ink Rule.** Yellow never sets text or strokes. On paper it is 1.3:1; it only works as a fill behind ink (14.2:1).
+**The Fill-Not-Ink Rule.** Yellow never sets text or strokes. On paper it is 1.3:1; it only works as a fill behind ink (14.2:1). One exception, by request: the drop-zone outline, a moving yellow dash that marks the card as a target. It carries no information a reader must decode, so contrast is not the job; motion and colour are.
 
 ## Typography
 
@@ -173,12 +190,44 @@ The display line is a single row that never wraps. The file name truncates with 
 ### Named Rules
 **The Extension Never Truncates Rule.** When space runs out, the file name gives way with an ellipsis. The dot and the highlighted extension always stay whole and visible.
 
+## Window
+
+A floating card, not a framed window: no title bar, 14px corners, a 1px hairline ring, the system shadow behind it, and on top of other windows by default (pin to change). The background drags the window. Pin and close sit top right at 28px; on Pick, Working and Done they share the row with the source line, which starts with a back arrow on Pick and Working (start over; Esc) and a plus on Done (new file; Esc). Back navigation does the same as Esc on every screen: the mouse Back button, ⌘[ on macOS, Alt+← on Windows. Notices clear after 3s (problems after 6s) and the card shrinks back.
+
+The card fits its content in both directions and springs between sizes. Width: wide enough for the whole file name with the widest extension in its list, and for the chips on one row, between 420 and 640. Past 640 the name truncates in the middle and the chips wrap into rows of even length. Widths are measured against the widest extension, so neither the name nor the card moves while scrolling through formats. Height: exactly the content. There is no reserved empty space: status lines appear only when there is something to say, and push the card taller.
+
+### Settings
+A list on the same card: label left in body type, switch right, 38px rows, a hover wash on the whole row (the row is the control). Switch: 34×20 pill; on is a selection-yellow track with an on-yellow knob, off is a hairline track with a paper knob. Labels say what is kept or done ("Keep location"), never "Enable…". The longer explanation lives in the row's tooltip. Opened from the gear on the empty card (which replaced the right-click toggle there; that toggle is now a row).
+
+### Focus
+Keyboard focus draws a 2px ink ring 2px outside the control. The card background is not focusable.
+
+### Drop zone
+While the card waits for a file (Empty), a 2px yellow dashed outline runs 9px inside its edge (period ~14px, 57% dash, fitted so a whole number of dashes closes the loop; the path starts mid-top so there is no seam), travelling at 22px/s. While files are dragged over the card, on any screen, it thickens to 3px and speeds to 60px/s, and the card takes a faint yellow tint (8% light, 4.5% dark). Nothing else changes on drag-over: no preview, no resize. Reduce Motion stops the dashes moving.
+
+On Done the outline returns once the entrance has settled (fades in from 0.8s to 1.3s), at 55% opacity and 12px/s: the result stays the focus, but the card still says "drop the next one here". The source row's leading icon on Done is a plus ("New file", Esc), not a back arrow: finishing is a step forward, not an undo.
+
+**Arrival feedback.** When files first enter the card: a light trackpad tick (macOS `NSHapticFeedbackPattern.alignment`, felt on Force Touch trackpads because the finger is down mid-drag) and the card surface squeezes 6px and springs back with a wobble. On drop: a firmer tick (`levelChange`) and a smaller outward bounce. Content does not move; only the surface does.
+
+## Motion
+
+Springs, not tweens: stiff and lightly underdamped, settling in about 250ms with a small overshoot. Reduce Motion turns every spring into a snap.
+
+- **Reel:** the extension springs in from the previous slot (with a little bounce); the neighbours move with it.
+- **Highlight width:** the yellow behind the extension springs to the new extension's width.
+- **Chip selection:** snaps. The reel above is the moving part; the chips are the index.
+- **Done entrance:** the tile pops from 82% to full size, and the yellow sweeps across the new file name left to right, as if it were just selected.
+- **Press:** buttons and icon buttons spring to 94% while held.
+- **Toggles:** the yellow fill (or the on-dot) pops in on a spring.
+- **Card size:** the card springs inside the window. The OS window is resized at most once per change: immediately when growing (the card then springs out into it) and once at the end when shrinking. Live window resizes stutter; never animate the window itself.
+- **Progress, toast slide-in:** springs.
+
 ## Elevation & Depth
 
 Flat. Inside the window there are no shadows; structure comes from the hairline grey, the hover wash, and the yellow fill. The mock draws its window with a 1px hairline ring and a soft drop shadow; that stands in for the OS window and is not a brand surface. In the native app the system supplies window chrome and shadow.
 
 ### Named Rules
-**The Flat Window Rule.** Nothing inside the window casts a shadow. Selection is shown by the yellow fill, hover by the wash.
+**The Flat Window Rule.** Nothing inside the card casts a shadow; only the card itself floats. Selection is shown by the yellow fill, hover by the wash.
 
 ## Shapes
 
@@ -192,7 +241,7 @@ The mark: a white rounded square; an ink dot at lower left; a yellow block (the 
 The file name in display type, a plain dot, then the current extension in a yellow highlight with ink text. A thin ink caret (0.05em wide) sits just right of the highlight. The previous and next extensions sit small above and below the highlight in a three-row stack, so the list reads as a vertical reel you scroll through. Scroll wheel (one step per 45px of delta), arrow keys (all four) step through the list with wrap-around; Enter converts. Clicking the highlighted extension converts.
 
 - PROVISIONAL: the caret blinks (1.1s, hard step, half on, half off) in the mock. Native should follow the system caret blink and stop under Reduce Motion, which the mock already does.
-- The neighbour extensions are decorative (hidden from assistive tech) and set in #b9bdc4, which is 1.9:1 on paper. That colour is not a token; resolve a legible neighbour colour before native build.
+- The neighbour extensions are decorative and repeated by the chips. The app sets them in #8a9098 (3.3:1 on paper, large semibold text). The mock's #b9bdc4 (1.9:1) is retired.
 
 ### Format Chips
 - **Style:** no fill, soft text, 600 label type, ".ext" lowercase, 6px radius, 6px 10px padding, 4px apart.
@@ -213,15 +262,22 @@ The file name in display type, a plain dot, then the current extension in a yell
 ### Drop State
 While a file is dragged over the window, a 2px dashed outline in the current text colour at 50% opacity sits 8px inside the content edge, 8px radius. PROVISIONAL: shared mock scaffold; confirm against native drag feedback.
 
+### Icons
+Lucide 1.60.0 (ISC), bundled as `assets/fonts/lucide.ttf` and drawn as text. One stroke weight, one family; no emoji or Unicode stand-ins. Icons replace explanatory text: what an icon does is said in its tooltip (a paper card with a hairline, body type, the shortcut after two spaces), not in a line on screen.
+
+- **Icon button:** 36px square (28px in the title row), 8px radius, soft icon at half the button size. Hover: hover-wash fill, ink icon. On, for a choice that applies to the next conversion (Smaller, Replace, Copied): selection-yellow fill, on-yellow icon.
+- **Setting toggle** (pin, right-click menu): stays on across conversions, so it is quieter: ink icon with a 6px yellow dot at the lower right when on, soft icon when off.
+- **Kind icon** before the source line: file-video, file-music, file-image, file-text (subtitles), file-braces (data), files (mixed).
+- **Quality badge** after the actions, caption 600 soft: zap "Lossless", hourglass "Slow". Nothing when a conversion is an ordinary re-encode.
+- **Notices** (errors, Trash, Downloads) are one line led by an icon: circle-alert, trash-2, download, check.
+
 ### Copy
-Plain, short, no slogans. Lines as shipped in the build:
-- Source: "From interview.mp4"
-- Prompt: "Pick a format."
-- Quality tag: "Same quality" or "Re-encodes, takes longer", followed by " · scroll or use arrows to change"
-- Busy: "Saving…" or "Re-encoding. This one takes longer…"
-- Done: "Saved **interview.mov** next to the original." plus " Re-encoded." when it was.
-- Unsupported: "Can't convert .xyz yet. Try a video, audio, or image file."
-- Voice samples on the board, not yet wired into the app: Empty "Drop a file.", Privacy "Stays on your Mac."
+Plain, short, no slogans, and only where an icon can't carry it.
+- Empty: "Drop a file." with one icon row below: folder-open (choose) and clipboard-paste (paste) on the left, the right-click-menu toggle on the right. No privacy badge: an icon that does nothing reads as a broken button, and people install Retype already knowing it is local.
+- Pick: kind icon + "interview.mp4 · 32 KB"; the button names the action and follows the toggles: "Save as .jpg", "Save smaller .jpg", "Replace with .jpg"; toggles shrink (⇧) and trash-2 (⌥).
+- Working: the bar, "62%" or "4 of 12", an × to cancel.
+- Done: the file row, its size, "Open", then folder (reveal), copy (turns into check for 1.5s), arrow-left-right (another format), undo-2. Status line only for exceptions: "Original in the Trash", "Saved to Downloads (that folder is read-only)", failures.
+- Unsupported: "Can't convert .xyz yet."
 
 ## Do's and Don'ts
 

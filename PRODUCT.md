@@ -4,11 +4,11 @@
 
 ## Platform
 
-Native desktop app (macOS / Windows). Exact OS priority undecided.
+Native desktop app, macOS and Windows shipped together (decided 2026-11-04). UI is custom-drawn with egui in the Retype visual system, not native platform controls; OS integration (drag-out, Finder/Explorer context menu, thumbnails) is native per platform.
 
 ## Stack
 
-Undecided for the app itself. Brand exploration delivered as a static HTML page.
+Rust + egui (eframe) for the app (2026-11-04). macOS Finder Sync extension is a small Swift appex calling the Rust binary; Windows context menu is a Rust `IExplorerCommand` COM DLL in a sparse MSIX package. Brand exploration is a static HTML page. App UX and flow: `docs/app-brief.md`.
 
 ## Users and job
 
@@ -21,6 +21,12 @@ Drop a file, get the neighbouring format back, with nothing to configure.
 ## Core interaction (confirmed 2026-11-04)
 
 Drag and drop a file, quickly move through the formats it can become, convert with one click. Speed and lack of friction are the product.
+
+## Confirmed app decisions (2026-11-04)
+
+- A converted file is a real file in the app: the Done row is a native OS drag source, and can be opened, revealed, or copied to the clipboard as a file.
+- Right-click in Finder/Explorer shows a **Retype ▸** submenu of target formats; picking one converts in place with a small toast, no main window.
+- One drop can hold many files; same-type batches share one picker, mixed drops get one picker per kind.
 
 ## Position and mechanism
 
@@ -37,5 +43,5 @@ Drag and drop a file, quickly move through the formats it can become, convert wi
 ## Open decisions
 
 - Name clearance (trademark, App Store, domain).
-- OS priority and native stack.
+- Media engine: bundled LGPL ffmpeg build vs linking; HEIC decode on Windows.
 - Pricing / distribution model.

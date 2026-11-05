@@ -216,6 +216,10 @@ pub struct RetypeApp {
     background: std::sync::Arc<std::sync::atomic::AtomicBool>,
     /// Files that arrived mid-conversion; loaded when it ends.
     pending: Vec<PathBuf>,
+    /// Options of the running conversion, for files that join it.
+    job_opts: Opts,
+    /// The notice is the "drop to add" hint shown while files hover.
+    drop_hint: bool,
     pos_saved_at: Instant,
     resident: crate::resident::Resident,
     /// Closed into the menu bar: invisible, click-through, still running.
@@ -236,6 +240,7 @@ impl RetypeApp {
     pub fn new(cc: &eframe::CreationContext<'_>, initial: Vec<PathBuf>) -> Self {
         theme::install(&cc.egui_ctx);
         crate::ipc::set_waker(&cc.egui_ctx);
+        platform::round_corners(cc);
         #[cfg(target_os = "macos")]
         crate::macos::watch_paste_key();
         let mut app = RetypeApp {
@@ -263,6 +268,8 @@ impl RetypeApp {
             back_nav: false,
             background: Default::default(),
             pending: Vec::new(),
+            job_opts: Opts::default(),
+            drop_hint: false,
             pos_saved_at: Instant::now(),
             resident: Default::default(),
             parked: false,
@@ -333,6 +340,84 @@ impl RetypeApp {
         self.screen = Screen::Pick;
     }
 
+    /// Files dropped on a card that already has some: they join the list instead
+    /// of replacing it. On Pick they merge in, keeping each kind's chosen format.
+    /// While converting, files that can become the running format join the queue;
+    /// the rest open once it ends. Shift while dropping starts over (`load`).
+    fn add(&mut self, paths: &[PathBuf]) {
+        let mut known: std::collections::HashSet<PathBuf> = self.groups.iter().flat_map(|g| g.files.iter().cloned()).chain(self.pending.iter().cloned()).collect();
+        let fresh: Vec<PathBuf> = expand(paths).into_iter().filter(|f| known.insert(f.clone())).collect();
+        match &self.screen {
+            Screen::Pick => {
+                if fresh.is_empty() {
+                    self.say(icon::FILES, "Already in the list.");
+                    return;
+                }
+                let chosen: Vec<(Kind, &'static str)> = self.groups.iter().map(|g| (g.kind, g.target())).collect();
+                let active = self.groups.get(self.active).map(|g| g.kind);
+                let all: Vec<PathBuf> = self.groups.iter().flat_map(|g| g.files.iter().cloned()).chain(fresh.iter().cloned()).collect();
+                self.load(&all);
+                for g in &mut self.groups {
+                    if let Some(i) = chosen.iter().find(|(k, _)| *k == g.kind).and_then(|(_, t)| g.targets.iter().position(|x| x == t)) {
+                        g.sel = i;
+                    }
+                }
+                self.active = active.and_then(|k| self.groups.iter().position(|g| g.kind == k)).unwrap_or(0);
+                if self.notice.is_none() {
+                    self.say(icon::PLUS, added_line(fresh.len()));
+                }
+            }
+            Screen::Working(job) if !job.is_cancelled() => {
+                let job = job.clone();
+                let (groups, rejected) = group_files(&fresh, &self.prefs);
+                let (mut tasks, mut joined, mut later) = (Vec::new(), 0, 0);
+                for ng in groups {
+                    let Some(g) = self.groups.iter_mut().find(|g| g.kind == ng.kind) else {
+                        later += ng.files.len();
+                        self.pending.extend(ng.files);
+                        continue;
+                    };
+                    let target = g.target();
+                    // Files already in the target format join too, and are left alone (as in `convert`).
+                    let (fits, rest): (Vec<PathBuf>, Vec<PathBuf>) = ng.files.into_iter().partition(|f| {
+                        let e = formats::ext_of(f).unwrap_or_default();
+                        e == target || formats::targets_for(&e).contains(&target)
+                    });
+                    later += rest.len();
+                    self.pending.extend(rest);
+                    let todo: Vec<PathBuf> = fits.iter().filter(|f| formats::ext_of(f).as_deref() != Some(target)).cloned().collect();
+                    if target == "pdf" {
+                        if !todo.is_empty() {
+                            tasks.push(Task { srcs: todo, target: target.into(), opts: self.job_opts });
+                        }
+                    } else {
+                        tasks.extend(todo.into_iter().map(|f| Task { srcs: vec![f], target: target.into(), opts: self.job_opts }));
+                    }
+                    g.bytes += fits.iter().map(|f| std::fs::metadata(f).map(|m| m.len()).unwrap_or(0)).sum::<u64>();
+                    joined += fits.len();
+                    g.files.extend(fits);
+                }
+                job.push(tasks);
+                let mut line = match (joined, later) {
+                    (0, 0) if fresh.is_empty() => "Already in the list.".to_string(),
+                    (0, 0) => String::new(),
+                    (n, 0) => added_line(n),
+                    (0, 1) => "That file opens when this finishes.".into(),
+                    (0, m) => format!("Those {m} files open when this finishes."),
+                    (n, m) => format!("{}. {m} more open when this finishes.", added_line(n).trim_end_matches('.')),
+                };
+                if !rejected.is_empty() {
+                    let n = rejected.len();
+                    let skipped = if n == 1 { "Skipped 1 file Retype can't convert.".to_string() } else { format!("Skipped {n} files Retype can't convert.") };
+                    line = if line.is_empty() { skipped } else { format!("{line} {skipped}") };
+                }
+                let glyph = if joined + later == 0 { icon::ALERT } else { icon::PLUS };
+                self.say(glyph, line);
+            }
+            _ => self.load(paths),
+        }
+    }
+
     /// Never a blocking dialog: a modal panel runs a nested event loop inside this
     /// frame, and an event arriving during it (e.g. a drag over the window) makes
     /// winit re-enter itself and abort. The chosen files arrive through the inbox.
@@ -396,6 +481,8 @@ impl RetypeApp {
             }
         }
         self.prefs.save();
+        self.job_opts = opts;
+        self.notice = None;
         let c = ctx.clone();
         self.screen = Screen::Working(Job::start(tasks, move || c.request_repaint()));
     }
@@ -527,6 +614,10 @@ impl RetypeApp {
     }
 }
 
+fn added_line(n: usize) -> String {
+    if n == 1 { "Added 1 file.".into() } else { format!("Added {n} files.") }
+}
+
 fn failure_line(failures: &[(PathBuf, String)], saved: usize) -> String {
     let name = |p: &PathBuf| p.file_name().and_then(|n| n.to_str()).unwrap_or("A file").to_string();
     match (saved, failures) {
@@ -573,7 +664,7 @@ fn file_glyph() -> image::RgbaImage {
 
 impl eframe::App for RetypeApp {
     fn clear_color(&self, _: &egui::Visuals) -> [f32; 4] {
-        [0.0; 4]
+        platform::clear_color()
     }
 
     /// Runs every frame, and also while the window is hidden (when `ui` doesn't):
@@ -719,10 +810,25 @@ impl eframe::App for RetypeApp {
             theme::spring_set(&ctx, kick_id, 1.0, 0.0);
         }
         self.hovering = !hovered.is_empty();
+        // A card that already has files adds to them; Shift starts over. Say which
+        // while the files hover.
+        let stacks = matches!(self.screen, Screen::Pick | Screen::Working(_));
+        let shift = (self.hovering || !dropped.is_empty()) && stacks && platform::shift_down();
+        if self.hovering && stacks {
+            let (g, s) = if shift { (icon::SWAP, "Drop to start over with these.") } else { (icon::PLUS, "Drop to add to the list. Shift starts over.") };
+            self.notice = Some((g, s.into(), Instant::now()));
+            self.drop_hint = true;
+            ctx.request_repaint_after(Duration::from_millis(50));
+        } else if self.drop_hint {
+            self.notice = None;
+            self.drop_hint = false;
+        }
         if !dropped.is_empty() {
             platform::haptic(true);
             theme::spring_set(&ctx, kick_id, -0.6, 0.0);
-            self.load(&dropped);
+            self.notice = None;
+            self.drop_hint = false;
+            if stacks && !shift { self.add(&dropped) } else { self.load(&dropped) }
         }
         let paste = platform::take_paste_key(focused) || paste_event;
         if paste && !matches!(self.screen, Screen::Working(_)) {
@@ -822,8 +928,11 @@ impl eframe::App for RetypeApp {
         let base_tint = if theme::is_dark() { 0.045 } else { 0.08 };
         let tint = if dragging { base_tint } else { 0.0 } + 1.25 * base_tint * kick.max(0.0);
         let fill = theme::paper().lerp_to_gamma(theme::YELLOW, tint.clamp(0.0, 0.25));
-        ui.painter().set(fill_slot, egui::Shape::rect_filled(surface, CornerRadius::same(RADIUS), fill));
-        ui.painter().rect_stroke(surface, CornerRadius::same(RADIUS), Stroke::new(1.0, theme::line()), StrokeKind::Inside);
+        let radius = CornerRadius::same(platform::card_radius(RADIUS));
+        ui.painter().set(fill_slot, egui::Shape::rect_filled(surface, radius, fill));
+        if !platform::os_rounds_corners() {
+            ui.painter().rect_stroke(surface, radius, Stroke::new(1.0, theme::line()), StrokeKind::Inside);
+        }
 
         // Drop zone: a yellow dashed outline that keeps moving while the card is
         // waiting for a file, and while files are dragged over it.
@@ -1535,7 +1644,11 @@ impl RetypeApp {
         if icon_button(ui, Pos2::new(c.max.x - 14.0, row_y), icon::X, "Cancel  Esc", false, "cancel", 32.0).clicked() {
             job.cancel();
         }
-        row_y + 16.0
+        let mut bottom = row_y + 16.0;
+        if self.notice.is_some() {
+            bottom = self.draw_notice(&p, Pos2::new(c.min.x, bottom + 14.0), c.width());
+        }
+        bottom
     }
 
     // ---------------------------------------------------------------- Done

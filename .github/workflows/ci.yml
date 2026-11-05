@@ -1,8 +1,16 @@
 name: CI
 
+# Pushes to main and pull requests. Not tags: the Release workflow builds those,
+# and running both made them queue behind each other.
 on:
   push:
+    branches: [main]
   pull_request:
+
+# A newer push to the same pull request replaces the run in progress.
+concurrency:
+  group: ci-${{ github.ref }}
+  cancel-in-progress: ${{ github.event_name == 'pull_request' }}
 
 jobs:
   test:
@@ -14,6 +22,11 @@ jobs:
     steps:
       - uses: actions/checkout@v4
       - uses: dtolnay/rust-toolchain@stable
+      # Compiled dependencies, keyed on Cargo.lock and the target platform. Shared
+      # with the Release workflow, so a tag build starts from what main compiled.
+      - uses: Swatinem/rust-cache@v2
+        with:
+          shared-key: release
 
       - name: Install ffmpeg (macOS)
         if: runner.os == 'macOS'
@@ -22,10 +35,12 @@ jobs:
         if: runner.os == 'Windows'
         run: choco install ffmpeg-full -y --no-progress
 
+      # Tests in release: the build below reuses every dependency instead of
+      # compiling them a second time for debug, and conversions run optimized.
+      - name: Test
+        run: cargo test --release
       - name: Build
         run: cargo build --release
-      - name: Test
-        run: cargo test
 
       - name: Bundle (macOS, self-contained)
         if: runner.os == 'macOS'
@@ -42,3 +57,16 @@ jobs:
         with:
           name: Retype-windows
           path: target/release/retype.exe
+
+  # The Intel DMG builds on an Intel runner (it embeds Intel ffmpeg libraries),
+  # which CI doesn't otherwise use. Compile on main so releases find a warm cache.
+  warm-intel:
+    if: github.event_name == 'push'
+    runs-on: macos-15-intel
+    steps:
+      - uses: actions/checkout@v4
+      - uses: dtolnay/rust-toolchain@stable
+      - uses: Swatinem/rust-cache@v2
+        with:
+          shared-key: release
+      - run: cargo build --release
